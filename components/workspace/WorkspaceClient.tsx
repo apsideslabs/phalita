@@ -38,6 +38,7 @@ import { TransitsPanel } from './TransitsPanel';
 import { BhavaChalitPanel } from './BhavaChalitPanel';
 import { AvakahadaPanel } from './AvakahadaPanel';
 import { IndicationsPanel } from './IndicationsPanel';
+import { PhalaPanel } from './PhalaPanel';
 import { EventTimingPanel } from './EventTimingPanel';
 import { MatchingBridgePanel } from './MatchingBridgePanel';
 import { PhalitaButton } from '../ui/PhalitaButton';
@@ -192,6 +193,7 @@ const PRESETS: PresetEvent[] = [
 
 export type WorkspaceTab =
   // PHALITA reading surfaces
+  | 'phala'
   | 'indications'
   | 'career'
   | 'education'
@@ -249,7 +251,8 @@ const NAV_DOMAINS: NavDomain[] = [
     icon: Sparkles,
     description: 'The complete twelve-domain reading of this chart through the five-layer synthesis protocol',
     subTabs: [
-      { id: 'indications', name: 'Full Reading — 12 Domains', shortName: '12 Domains', icon: Sparkles, badge: 'Core' },
+      { id: 'phala', name: 'Phala — Gochara & Janma Rāśi', shortName: 'Phala', icon: BookOpen, badge: 'Mūla' },
+      { id: 'indications', name: 'Full Reading — 12 Domains', shortName: '12 Domains', icon: Sparkles },
     ],
   },
   {
@@ -553,7 +556,7 @@ export const WorkspaceClient: React.FC = () => {
   const sectionParam = searchParams?.get('section') ?? null;
   const [activeTab, setActiveTab] = useState<WorkspaceTab>(() => {
     const target = sectionParam ? getSection(sectionParam) : undefined;
-    return (target?.workspaceTab as WorkspaceTab) ?? 'indications';
+    return (target?.workspaceTab as WorkspaceTab) ?? 'phala';
   });
 
   // ?section= is read once at mount above; the workspace does not swap sections in place.
@@ -1880,6 +1883,9 @@ ${Object.values(chartData.planets)
         )}
 
         {/* PHALITA reading surfaces */}
+        {activeTab === 'phala' && (
+          <PhalaPanel chart={chartData} ayanamshaType={ayanamshaType} />
+        )}
         {activeTab === 'indications' && <IndicationsPanel chart={chartData} />}
         {activeTab === 'career' && (
           <IndicationsPanel chart={chartData} focusDomainId="career" />

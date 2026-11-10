@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "clean": "next clean"
+    "clean": "next clean",
+    "check:corpus": "node scripts/run-check-phala.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

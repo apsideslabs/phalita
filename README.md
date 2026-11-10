@@ -38,6 +38,29 @@ supported. A statement with no period is not a prediction.
 **No AI in the path.** There is no model call, no API key, no server. The
 platform is a static site and every sentence is produced by deterministic code.
 
+## The phala engine
+
+The prediction engine is a corpus of verses, not a set of heuristics. It reads
+the chart the way the Kāmarūpa pañjikā tradition does — from the **janma rāśi**,
+not the lagna — and applies:
+
+* **Phaladīpikā 9.1–9.12** — the twelve rāśi readings, with the Candra-lagna rule
+  at 9.13 that licenses reading the Moon's sign first;
+* **Phaladīpikā 26.9–26.24** — the gochara of eight grahas through the twelve
+  houses counted from that rāśi;
+* **Phaladīpikā 26.2–26.8** — vedha, which obstructs a benefic transit;
+* **Phaladīpikā 26.41** — the bhinnaṣṭakavarga bindus of the transited rāśi as a
+  modifier.
+
+Every line in the interface can be opened to show its **Devanagari mūla**, its
+adhyāya and śloka, and the e-text it came from. Where the text does not state a
+result — Ketu's transit, or the twelfth house in two verses that list eleven
+effects — the reading says so instead of filling the gap.
+
+`npm run check:corpus` fails the build if a rule loses its verse, if a verse
+loses its Devanagari, or if a gap appears that the corpus has not declared. The
+editorial policy and the full provenance are in [SOURCES.md](./SOURCES.md).
+
 ## The eleven sections
 
 Each section is a real surface in the reading workspace, not a landing page with
