@@ -12,3 +12,7 @@ export { buildReading } from './reading';
 export type { FullReading, ReadingSection } from './reading';
 export { PHALADIPIKA_10_VERSES } from './corpus-phaladipika-10';
 export { PHALADIPIKA_22_VERSES } from './corpus-phaladipika-22';
+export { evaluateBhavas } from './bhava';
+export { evaluateYogas } from './yogas';
+export { PHALADIPIKA_16_VERSES } from './corpus-phaladipika-16';
+export { PHALADIPIKA_06_VERSES } from './corpus-phaladipika-06';
