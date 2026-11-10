@@ -15,6 +15,7 @@
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
 import { buildQuestions } from './questions';
 import { buildQuestions2 } from './questions2';
+import { buildCatalogue } from './catalogue-engine';
 
 export interface SynthesisFactor {
   label: string;
@@ -254,6 +255,13 @@ export function marriageMode(chart: JyotishaChart): Synthesis {
 }
 
 export function buildSynthesis(chart: JyotishaChart): Synthesis[] {
-  // The two detailed readings first, then the wider catalogue of questions.
-  return [careerMode(chart), marriageMode(chart), ...buildQuestions(chart), ...buildQuestions2(chart)];
+  // The two detailed readings first, then the hand-built questions, then the
+  // full catalogue of 250.
+  return [
+    careerMode(chart),
+    marriageMode(chart),
+    ...buildQuestions(chart),
+    ...buildQuestions2(chart),
+    ...buildCatalogue(chart),
+  ];
 }
