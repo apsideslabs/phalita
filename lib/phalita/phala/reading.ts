@@ -1,10 +1,11 @@
 /**
  * PHALITA — the full reading.
  *
- * One birth, one page: svabhāva (character), vivāha (marriage), āyurdāya
- * (longevity) and gochara (the present). Each section is a set of conditional
- * rules, and every rule is a verse of Phaladīpikā whose conditions the engine
- * actually tests. A rule that cannot fire is not in the corpus.
+ * One birth, one page: svabhāva (character), yogas, the twelve bhāvas,
+ * vivāha (marriage), āyurdāya (longevity) and gochara (the present). Each
+ * section is a set of conditional rules, and every rule is a verse of
+ * Phaladīpikā whose conditions the engine actually tests. A rule that cannot
+ * fire is not in the corpus.
  *
  * Where a rule's harsh reading is cancelled by a later verse of the same text —
  * 10.7 cancelling 10.15, for instance — the cancellation is applied and both
@@ -19,12 +20,14 @@ import { buildPhalaReport, citationOf } from './engine';
 import { PHALADIPIKA_10_VERSES } from './corpus-phaladipika-10';
 import { PHALADIPIKA_22_VERSES } from './corpus-phaladipika-22';
 import type { PhalaStatement, GocharaReading } from './types';
+import { evaluateBhavas } from './bhava';
+import { evaluateYogas } from './yogas';
 
 const MALEFICS: PlanetId[] = ['sun', 'mars', 'saturn', 'rahu', 'ketu'];
 const BENEFICS: PlanetId[] = ['jupiter', 'venus', 'moon', 'mercury'];
 
 export interface ReadingSection {
-  id: 'svabhava' | 'vivaha' | 'ayus' | 'gochara';
+  id: 'svabhava' | 'yogas' | 'bhava' | 'vivaha' | 'ayus' | 'gochara';
   title: string;
   sanskrit: string;
   intro: string;
@@ -128,6 +131,38 @@ export function buildReading(
       );
     }
   }
+
+  // ---- Yogas --------------------------------------------------------------
+  const yogaResult = evaluateYogas(chart);
+  const yogas: ReadingSection = {
+    id: 'yogas',
+    title: 'Yogas — Combinations',
+    sanskrit: 'योग',
+    intro:
+      'A yoga is a condition, not a decoration. Each of these names the exact placement that produces it, and is reported only when the chart holds it.',
+    statements: yogaResult.statements,
+    note:
+      yogaResult.statements.length === 0
+        ? 'None of the classical yogas held in this chart. The rules tested are listed below, so you can see what was looked for.'
+        : undefined,
+    tested: yogaResult.tested,
+  };
+
+  // ---- Bhāva phala — the twelve houses ------------------------------------
+  const bhavaResult = evaluateBhavas(chart);
+  const bhava: ReadingSection = {
+    id: 'bhava',
+    title: 'Bhāva Phala — The Twelve Sectors of Life',
+    sanskrit: 'द्वादश भावफल',
+    intro:
+      'House by house, from Phaladīpikā 16: body, wealth, siblings, home, children, health, marriage, longevity, fortune, career and gains.',
+    statements: bhavaResult.statements,
+    note:
+      bhavaResult.statements.length === 0
+        ? 'No bhāva condition of chapter 16 held in this chart.'
+        : undefined,
+    tested: bhavaResult.tested,
+  };
 
   // ---- Vivāha -------------------------------------------------------------
   const vivaha: ReadingSection = {
@@ -328,6 +363,8 @@ export function buildReading(
       ...svabhava.statements.map((s) => s.citation.verseId),
       ...vivaha.statements.map((s) => s.citation.verseId),
       ...ayus.statements.map((s) => s.citation.verseId),
+      ...yogas.statements.map((s) => s.citation.verseId),
+      ...bhava.statements.map((s) => s.citation.verseId),
     ])
   );
 
@@ -335,7 +372,7 @@ export function buildReading(
     janmaRashi: base.janmaRashi,
     janmaRashiName: base.janmaRashiName,
     janmaNakshatra: base.janmaNakshatra,
-    sections: [svabhava, vivaha, ayus, gochara],
+    sections: [svabhava, yogas, bhava, vivaha, ayus, gochara],
     gochara: base.gochara,
     versesUsed,
     date: base.gochara.date,
