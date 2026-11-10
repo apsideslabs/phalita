@@ -155,7 +155,7 @@ export function calculateVargaRashi(
     }
 
     case 'D7': {
-      // Saptāṃśa (7 parts of 4°17'8.57\" = 30/7°)
+      // Saptāṃśa (7 parts of 4°17′8.57″ = 30/7°)
       // Odd sign: starts from same sign
       // Even sign: starts from 7th from it
       const part = Math.floor(degInRashi / (30.0 / 7.0));
@@ -191,7 +191,7 @@ export function calculateVargaRashi(
     }
 
     case 'D16': {
-      // Ṣoḍaśāṃśa (16 parts of 1°52'30\" = 1.875°)
+      // Ṣoḍaśāṃśa (16 parts of 1°52′30″ = 1.875°)
       // Movable (Chara): starts from Mesha (1)
       // Fixed (Sthira): starts from Simha (5)
       // Dual (Dvisvabhava): starts from Dhanu (9)
@@ -214,7 +214,7 @@ export function calculateVargaRashi(
       const mobility = RASHIS[rashiNum].mobility;
       let startRashi = 1;
       if (mobility.startsWith('Sthira')) startRashi = 9;
-      else if (mobility.startsWith('Dvishabhava')) startRashi = 5;
+      else if (mobility.startsWith('Dvisvabhava')) startRashi = 5;
 
       targetRashi = (((startRashi - 1 + part) % 12) + 1);
       break;
@@ -231,7 +231,7 @@ export function calculateVargaRashi(
     }
 
     case 'D27': {
-      // Saptaviṃśāṃśa (27 parts of 1°6'40\" = 30/27°)
+      // Saptaviṃśāṃśa (27 parts of 1°6′40″ = 30/27°)
       // Fiery: starts from Mesha (1)
       // Earthy: starts from Karka (4)
       // Airy: starts from Tula (7)
@@ -353,7 +353,7 @@ export function calculateVargaRashi(
     }
 
     case 'D11': {
-      // Rudrāṃśa / Ekādaśāṃśa (11 parts of 2°43'38.18\" = 30/11°)
+      // Rudrāṃśa / Ekādaśāṃśa (11 parts of 2°43′38.18″ = 30/11°)
       // Canonical BPHS & Jaimini rule: Counted in reverse of signs for start sign:
       // Aries=Aries(1), Taurus=Pisces(12), Gemini=Aquarius(11), Cancer=Capricorn(10)...
       // Formula: startRashi = 13 - rashiNum, then count consecutively forward
@@ -368,7 +368,7 @@ export function calculateVargaRashi(
 
     case 'D81': {
       // Ekāśītāṃśa / Navanavāṃśa (81 parts, 9×9 harmonic Navāṃśa of Navāṃśa)
-      // Micro-division of each Navāṃśa (3°20' = 200') into 9 sub-parts of 22'13.33\"
+      // Micro-division of each Navāṃśa (3°20' = 200') into 9 sub-parts of 22′13.33″
       const d9Part = Math.min(8, Math.floor(degInRashi / (30.0 / 9.0)));
       const mobility = RASHIS[rashiNum].mobility;
       let d9Start = rashiNum;
@@ -388,7 +388,7 @@ export function calculateVargaRashi(
     }
 
     case 'D108': {
-      // Aṣṭottaraśatāṃśa (108 parts of 16'40\" = 30/108°)
+      // Aṣṭottaraśatāṃśa (108 parts of 16′40″ = 30/108°)
       // Classical Nakshatra Pada harmonic: Cycles through the 12 signs from the sign itself
       const part = Math.min(107, Math.floor(degInRashi / (30.0 / 108.0)));
       targetRashi = (((rashiNum - 1 + part) % 12) + 1);
@@ -396,7 +396,7 @@ export function calculateVargaRashi(
     }
 
     case 'D144': {
-      // Dvādaśadvādaśāṃśa (144 parts of 12'30\" = 30/144°)
+      // Dvādaśadvādaśāṃśa (144 parts of 12′30″ = 30/144°)
       // 12×12 Dvādaśāṃśa harmonic: Each Dvādaśāṃśa (2°30') is divided into 12 parts of 12.5'
       const d12Part = Math.min(11, Math.floor(degInRashi / 2.5));
       const d12Rashi = (((rashiNum - 1 + d12Part) % 12) + 1);
