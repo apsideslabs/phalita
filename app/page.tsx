@@ -3,13 +3,13 @@ import type { Metadata } from 'next';
 import { HomeView } from '@/components/home/HomeView';
 
 export const metadata: Metadata = {
-  title: 'Phalita — Classical Jyotiṣa Calculation & Ephemeris Workstation',
+  title: 'Phalita — Jyotiṣa Prediction',
   description:
-    'High-precision astronomical calculation engine with VSOP87 ephemerides, authentic Parāśari & Jaimini mechanics, and auditable classical manuscripts.',
+    'Structured Jyotiṣa readings from a calculated horoscope — character, yogas, the twelve houses, marriage, longevity and transits, each line a verse of Phaladīpikā you can open.',
   openGraph: {
-    title: 'Phalita — Classical Jyotiṣa Calculation & Ephemeris Workstation',
+    title: 'Phalita — Jyotiṣa Prediction',
     description:
-      'High-precision astronomical calculation engine with VSOP87 ephemerides, authentic Parāśari & Jaimini mechanics, and auditable classical manuscripts.',
+      'Structured Jyotiṣa readings from a calculated horoscope — character, yogas, the twelve houses, marriage, longevity and transits, each line a verse of Phaladīpikā you can open.',
     type: 'website',
   },
 };
