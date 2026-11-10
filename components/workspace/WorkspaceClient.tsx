@@ -358,28 +358,6 @@ const NAV_DOMAINS: NavDomain[] = [
       { id: 'cases', name: 'Verification Dossier (प्रमाण)', shortName: 'Dossier', icon: ShieldCheck },
     ],
   },
-  {
-    id: 'chart_data',
-    name: 'Chart Data',
-    shortName: 'Calculated Chart',
-    icon: Compass,
-    description: 'The calculated horoscope this platform reads — charts, strengths, daśās and yogas',
-    subTabs: [
-      { id: 'kundali', name: 'Lagna Kuṇḍalī (D-1)', shortName: 'D-1 Lagna', icon: Compass },
-      { id: 'avakahada', name: 'Avakahada Cakra', shortName: 'Avakahada', icon: Sparkles },
-      { id: 'vargas', name: 'Ṣoḍaśavarga (16 Charts)', shortName: '16 Vargas', icon: Layers, badge: 'D1–D60' },
-      { id: 'navamsha', name: 'Navāṃśa (D-9)', shortName: 'Navāṃśa', icon: Table },
-      { id: 'planets', name: 'Planetary Table & Speeds', shortName: 'Grahas', icon: Table },
-      { id: 'sphutas', name: 'Sphuṭas & Upagrahas', shortName: 'Sphuṭas', icon: Compass },
-      { id: 'bhavas', name: 'Bhāva Chalita & Sandhis', shortName: 'Bhāvas', icon: HomeIcon },
-      { id: 'aspects', name: 'Dṛṣṭi (Aspects)', shortName: 'Dṛṣṭi', icon: Eye },
-      { id: 'shadbala', name: 'Śaḍbala & Viṃśopakā', shortName: 'Śaḍbala', icon: Award },
-      { id: 'ashtakavarga', name: 'Aṣṭakavarga & Śodhana', shortName: 'Aṣṭakavarga', icon: FileSpreadsheet },
-      { id: 'yogas', name: 'Classical Yogas', shortName: 'Yogas', icon: BookOpen },
-      { id: 'doshas', name: 'Doshas & Ariṣṭa', shortName: 'Doshas', icon: ShieldAlert },
-      { id: 'remedies', name: 'Remedies (Śānti)', shortName: 'Remedies', icon: Flower2 },
-    ],
-  },
 ];
 
 const VARGA_LABELS: Record<VargaId, string> = {

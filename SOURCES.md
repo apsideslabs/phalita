@@ -41,9 +41,11 @@ transcription, it slots into the same corpus without any change to the engine.
 | Gochara phala | Phaladīpikā | 26.1–26.24 | Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rāhu |
 | Vedha (obstruction) | Phaladīpikā | 26.2–26.8 | complete |
 | Aṣṭakavarga modifier | Phaladīpikā | 26.41 | complete |
-| Graha-in-rāśi rules | Phaladīpikā | 9.14–9.20 | stored, not yet wired to a reading surface |
+| Graha-in-rāśi rules (character) | Phaladīpikā | 9.14–9.20 | wired into the Svabhāva section |
+| Marriage conditions | Phaladīpikā | 10.2, 10.6, 10.7, 10.9, 10.13, 10.15 | six testable rules, with 10.7 as the cancellation |
+| Longevity | Phaladīpikā | 22.24, 22.26, 22.28 | method selection and the classical caution — no date |
 
-45 verses, 94 gochara rows, 12 rāśi readings. Ketu has no separate chapter in
+54 verses, 94 gochara rows, 12 rāśi readings, 6 marriage rules, 3 longevity verses. Ketu has no separate chapter in
 Phaladīpikā 26 — the text treats the nodes together (26.40) and gives the phala
 in 26.24 — so Ketu's transit is reported as **not stated** rather than guessed.
 
@@ -51,6 +53,19 @@ Two verses yield eleven effects for twelve houses in this recension (26.12 for
 the Moon, 26.24 for Rāhu). The engine assigns the eleven in order and reports
 the twelfth house as unstated. Both cases are flagged in the corpus and shown in
 the interface.
+
+## 2a. Longevity — why there is no death date
+
+Phaladīpikā 22 gives three methods: aṃśāyu from the lagna's strength, piṇḍāyu
+from the Sun's, and naisargika from the Moon's (22.28). The engine computes
+which of the three the chart selects and reports the Vedic ceiling of a hundred
+autumns (22.26).
+
+It does not compute the number. The piṇḍāyu depends on the haraṇa reductions of
+22.21 and 22.23, and 22.24 records that **Bhadanta rejected the piṇḍāyu as
+primary and Varāhamihira said the same**. Where the tradition disputes its own
+arithmetic, publishing a date would be a claim the text does not support. The
+reading therefore stops at the method and the ceiling, and says so on the page.
 
 ## 3. What is not yet in the corpus
 
@@ -60,6 +75,8 @@ reading:
 | Family | Text | Reference |
 |---|---|---|
 | Bhāva phala — the twelve houses | Phaladīpikā | 8 (bhāvāśraya), 15–16 (dvādaśa-bhāva-phala) |
+| The rest of the marriage chapter | Phaladīpikā | 10.1, 10.3–10.5, 10.8, 10.10–10.12, 10.14 |
+| Āyurdāya arithmetic | Phaladīpikā | 22.21–22.23, 22.25 (the haraṇa reductions) |
 | Daśā phala — period results | Phaladīpikā | 19–20 |
 | Yogas and rāja-yogas | Phaladīpikā | 6–7 |
 | Aṣṭakavarga construction | Phaladīpikā | 23 |

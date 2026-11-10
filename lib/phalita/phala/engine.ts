@@ -23,6 +23,8 @@ import { calculateCurrentTransits } from '@/lib/jyotisha/transits';
 import { AyanamshaType } from '@/lib/astronomy/ayanamsha';
 import { PHALADIPIKA_26_VERSES, PHALADIPIKA_26_ROWS } from './corpus-phaladipika-26';
 import { PHALADIPIKA_09_VERSES, PHALADIPIKA_09_RASHIS } from './corpus-phaladipika-09';
+import { PHALADIPIKA_10_VERSES } from './corpus-phaladipika-10';
+import { PHALADIPIKA_22_VERSES } from './corpus-phaladipika-22';
 import type {
   GocharaReading,
   PhalaReport,
@@ -49,7 +51,12 @@ export const SOURCES: PhalaSource[] = [
   },
 ];
 
-export const ALL_VERSES: PhalaVerse[] = [...PHALADIPIKA_09_VERSES, ...PHALADIPIKA_26_VERSES];
+export const ALL_VERSES: PhalaVerse[] = [
+  ...PHALADIPIKA_09_VERSES,
+  ...PHALADIPIKA_10_VERSES,
+  ...PHALADIPIKA_22_VERSES,
+  ...PHALADIPIKA_26_VERSES,
+];
 
 const VERSE_BY_ID = new Map(ALL_VERSES.map((v) => [v.id, v]));
 
@@ -65,7 +72,7 @@ export function shortCitation(verseId: string): string {
   return `${src?.title ?? v.sourceId} ${v.adhyaya}.${v.shloka}`;
 }
 
-function citationOf(verseId: string): PhalaStatement['citation'] {
+export function citationOf(verseId: string): PhalaStatement['citation'] {
   const v = VERSE_BY_ID.get(verseId);
   return {
     verseId,
@@ -264,6 +271,24 @@ export function buildPhalaReport(
           name: 'Aṣṭakavarga modification of transit',
           status: 'complete',
           detail: '26.41, applied from the bhinnaṣṭakavarga bindus of the transited rāśi.',
+        },
+        {
+          name: 'Svabhāva — character and constitution',
+          status: 'complete',
+          detail:
+            'The janma-rāśi reading (9.1–9.12) plus the lagna lord’s dignity rules of 9.14–9.20.',
+        },
+        {
+          name: 'Vivāha — marriage',
+          status: 'partial',
+          detail:
+            'Six testable conditions of Phaladīpikā 10: the seventh lord in the fifth or sixth, in debilitation, the seventh afflicted by malefic conjunction or dṛṣṭi, the lagna lord in the seventh, a strong benefic seventh lord, and the 10.7 cancellation. The remaining verses of ch. 10 need the upapada and the dṛṣṭi of the seventh from Venus, which this build does not yet evaluate.',
+        },
+        {
+          name: 'Āyurdāya — longevity',
+          status: 'partial',
+          detail:
+            'The method the chart selects (22.28), the Vedic ceiling (22.26) and the tradition’s own objection to the piṇḍāyu (22.24). No death date is computed: the haraṇa reductions of 22.21–22.23 are not implemented and 22.24 records the dispute.',
         },
         {
           name: 'Bhāva phala — the twelve houses',
