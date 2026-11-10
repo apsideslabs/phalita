@@ -58,6 +58,13 @@ export interface Claim {
   cancels?: string;
   /** 3 = an exact condition of the text, 2 = a general statement, 1 = a disposition. */
   scope: number;
+  /**
+   * How much the statement claims. A 'fatal' reading — loss of a spouse, death,
+   * childlessness — is never pronounced from one condition: the gate in
+   * resolveTheme withholds it unless a second condition of the same text
+   * corroborates it.
+   */
+  severity?: 'mild' | 'serious' | 'fatal';
 }
 
 export interface WeighedClaim extends Claim {
@@ -67,7 +74,7 @@ export interface WeighedClaim extends Claim {
 
 export interface Verdict {
   theme: Theme;
-  net: 'shubha' | 'ashubha' | 'balanced' | 'none';
+  net: 'shubha' | 'ashubha' | 'balanced' | 'none' | 'withheld';
   /** Margin between the winning and losing sides, 0–100. */
   confidence: number;
   winner?: WeighedClaim;
@@ -241,6 +248,27 @@ export function resolveTheme(theme: Theme, claims: Claim[], chart: JyotishaChart
 
   const only = good.length ? good : bad;
   const top = only[0];
+
+  // A fatal reading needs corroboration. One condition of one verse is a
+  // warning, not a verdict — and a verdict of "loss of spouse" from a single
+  // affliction is exactly the kind of line that does damage.
+  if (top.severity === 'fatal' && only.filter((c) => c.polarity === top.polarity).length < 2) {
+    reasoning.push(
+      `${top.short} names a grave outcome, but it is a single condition. The text gives other conditions in the same chapter that contradict it, and none of them held here. This platform does not turn one affliction into a verdict of loss, so the reading is withheld rather than pronounced.`
+    );
+    return {
+      theme,
+      net: 'withheld',
+      confidence: 0,
+      // No winner and no losers: a withheld reading must not render as
+      // "Follow: ..." anywhere. The verse stays visible among the statements
+      // as a condition that fired; it does not become the verdict.
+      winner: undefined,
+      losers: [],
+      cancelled,
+      reasoning,
+    };
+  }
   reasoning.push(
     only.length === 1
       ? `One reading applies here: ${top.short} (weight ${top.weight}).`
@@ -349,12 +377,29 @@ export function buildVerdicts(
       ...c,
       hinge: lord(7),
     }));
-    // 10.7 is the text's own cancellation of 10.15 — name the link explicitly.
-    const hard = claims.find((c) => c.verseId === 'phaladipika.10.15');
-    const soft = claims.find((c) => c.verseId === 'phaladipika.10.7');
-    if (hard && soft) {
-      soft.kind = 'cancellation';
-      soft.cancels = hard.id;
+    // The grave readings of this chapter are tagged fatal, so the gate applies.
+    for (const c of claims) {
+      if (c.verseId === 'phaladipika.10.15' || c.verseId === 'phaladipika.10.2') {
+        c.severity = 'fatal';
+      }
+    }
+
+    // The chapter argues with itself, and its own counter-verses withdraw the
+    // grave reading outright: a strong benefic seventh lord (10.6), a seventh
+    // lord free of the Sun's burning (10.9), the lagna lord in the seventh
+    // (10.13) and benefic company on the seventh (10.7) all contradict it.
+    // Where any of those hold, kalatra-hāni is not the reading.
+    const grave = claims.find(
+      (c) => c.verseId === 'phaladipika.10.15' || c.verseId === 'phaladipika.10.2'
+    );
+    if (grave) {
+      for (const vid of ['phaladipika.10.7', 'phaladipika.10.6', 'phaladipika.10.9', 'phaladipika.10.13']) {
+        const counter = claims.find((c) => c.verseId === vid);
+        if (counter) {
+          counter.kind = 'cancellation';
+          counter.cancels = grave.id;
+        }
+      }
     }
     return [resolveTheme('marriage', claims, chart)];
   }
