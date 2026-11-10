@@ -28,6 +28,7 @@ import { PHALADIPIKA_16_VERSES } from './corpus-phaladipika-16';
 import { PHALADIPIKA_06_VERSES } from './corpus-phaladipika-06';
 import { PHALADIPIKA_22_VERSES } from './corpus-phaladipika-22';
 import { PHALADIPIKA_07_VERSES } from './corpus-phaladipika-07';
+import { PHALADIPIKA_19_VERSES } from './corpus-phaladipika-19';
 import type {
   GocharaReading,
   PhalaReport,
@@ -60,6 +61,7 @@ export const ALL_VERSES: PhalaVerse[] = [
   ...PHALADIPIKA_16_VERSES,
   ...PHALADIPIKA_06_VERSES,
   ...PHALADIPIKA_07_VERSES,
+  ...PHALADIPIKA_19_VERSES,
   ...PHALADIPIKA_22_VERSES,
   ...PHALADIPIKA_26_VERSES,
 ];
@@ -316,8 +318,9 @@ export function buildPhalaReport(
         },
         {
           name: 'Daśā phala — period results',
-          status: 'pending',
-          detail: 'Phaladīpikā 19–20 (daśā-phala) are not yet transcribed.',
+          status: 'partial',
+          detail:
+            'The mahādaśā phala of all nine grahas (19.5–19.17), with 19.8 governing the reading by the lord’s strength. The antardaśā phala of chapter 20 is not yet transcribed.',
         },
         {
           name: 'Nakṣatra phala — the 27 stars',
