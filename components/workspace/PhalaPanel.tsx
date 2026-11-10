@@ -4,8 +4,8 @@
  * PHALITA — the reading.
  *
  * The chart never appears here. Birth data goes in, and what comes out is the
- * astrologer's answer: svabhāva, vivāha, āyurdāya and the present gochara, each
- * line carrying the verse that produced it.
+ * astrologer's answer: svabhāva, vivāha, āyurdāya and the present, each line
+ * carrying the verse that produced it.
  *
  * Each section opens with a resolved verdict — what to follow, what was
  * outweighed, and what was cancelled — before the evidence it rests on.
@@ -19,6 +19,8 @@ import { buildReading, SOURCES, ALL_VERSES } from '@/lib/phalita/phala';
 import type { PhalaStatement, ReadingSection } from '@/lib/phalita/phala';
 import { buildVerdicts } from '@/lib/phalita/phala/resolve';
 import { buildDashaPhala } from '@/lib/phalita/phala/dasha';
+import { buildSynthesis } from '@/lib/phalita/phala/synthesis';
+import type { Synthesis } from '@/lib/phalita/phala/synthesis';
 import type { Verdict } from '@/lib/phalita/phala/resolve';
 import {
   BookOpen,
@@ -156,6 +158,8 @@ function VerdictCard({ v }: { v: Verdict }) {
       ? { label: 'Aśubha', cls: 'bg-rose-50 text-rose-900 border-rose-200' }
       : v.net === 'balanced'
       ? { label: 'Miśra', cls: 'bg-amber-50 text-amber-900 border-amber-200' }
+      : v.net === 'withheld'
+      ? { label: 'Withheld', cls: 'bg-slate-100 text-slate-700 border-slate-300' }
       : { label: '—', cls: 'bg-slate-50 text-slate-600 border-slate-200' };
 
   return (
@@ -167,7 +171,9 @@ function VerdictCard({ v }: { v: Verdict }) {
         <span className={`px-2 py-0.5 rounded border text-[10px] font-mono uppercase tracking-wider ${net.cls}`}>
           {net.label}
         </span>
-        <span className="text-[10px] font-mono text-slate-500">confidence {v.confidence}</span>
+        {v.net !== 'withheld' && (
+          <span className="text-[10px] font-mono text-slate-500">confidence {v.confidence}</span>
+        )}
       </div>
 
       {v.winner && (
@@ -218,6 +224,68 @@ function VerdictCard({ v }: { v: Verdict }) {
   );
 }
 
+function SynthesisCard({ s }: { s: Synthesis }) {
+  const [open, setOpen] = useState(false);
+  const total = s.aScore + s.bScore || 1;
+  const aPct = Math.round((s.aScore / total) * 100);
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200/90 p-4">
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C2D19]">
+          {s.question}
+        </span>
+        <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-mono uppercase">
+          synthesis
+        </span>
+      </div>
+      <p className="mt-1.5 font-serif text-[15px] leading-relaxed text-slate-900">{s.answer}</p>
+
+      <div className="mt-3 flex items-center gap-2 text-[10px] font-mono text-slate-500">
+        <span>
+          {s.a} {s.aScore.toFixed(1)}
+        </span>
+        <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+          <div className="h-full bg-[#8C2D19]/70" style={{ width: `${aPct}%` }} />
+        </div>
+        <span>
+          {s.bScore.toFixed(1)} {s.b}
+        </span>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="mt-2 inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-[#8C2D19] hover:underline"
+      >
+        {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+        {open ? 'Hide' : 'What decided it'}
+      </button>
+
+      {open && (
+        <div className="mt-2 space-y-1">
+          {s.factors.map((f, i) => (
+            <div key={i} className="flex items-start gap-2 text-[11px] leading-snug">
+              <span
+                className={`mt-1 w-1.5 h-1.5 rounded-full shrink-0 ${
+                  f.side === 'a' ? 'bg-[#8C2D19]' : 'bg-slate-400'
+                }`}
+              />
+              <span className="text-slate-700">
+                {f.label}{' '}
+                <span className="text-slate-400">
+                  ({f.side === 'a' ? s.a : s.b}, +{f.weight})
+                </span>
+                <span className="block text-[10px] text-slate-500">{f.ground}</span>
+              </span>
+            </div>
+          ))}
+          <p className="mt-2 text-[10px] text-slate-500 leading-snug italic">{s.caveat}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function DashaCard({ chart, date }: { chart: JyotishaChart; date: Date }) {
   const d = buildDashaPhala(chart, date);
   return (
@@ -238,7 +306,9 @@ function DashaCard({ chart, date }: { chart: JyotishaChart; date: Date }) {
 
       <div className="bg-white rounded-2xl border border-slate-200/90 p-4">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Mahādaśā</span>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
+            Mahādaśā
+          </span>
           <span className="font-serif font-bold text-slate-900">{d.mahadasha.name}</span>
           <span className="text-[11px] font-mono text-slate-500">
             {d.mahadasha.start} → {d.mahadasha.end}
@@ -246,7 +316,9 @@ function DashaCard({ chart, date }: { chart: JyotishaChart; date: Date }) {
         </div>
         {d.antardasha && (
           <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Antardaśā</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
+              Antardaśā
+            </span>
             <span className="text-[13px] text-slate-800">{d.antardasha.name}</span>
             <span className="text-[11px] font-mono text-slate-500">
               {d.antardasha.start} → {d.antardasha.end}
@@ -368,6 +440,7 @@ export function PhalaPanel({ chart, ayanamshaType }: PhalaPanelProps) {
     [chart, date, ayanamshaType]
   );
 
+  const synthesis = useMemo(() => buildSynthesis(chart), [chart]);
   const source = SOURCES[0];
 
   return (
@@ -408,6 +481,28 @@ export function PhalaPanel({ chart, ayanamshaType }: PhalaPanelProps) {
           </label>
         </div>
       </div>
+
+      <section className="space-y-3">
+        <div className="flex items-start gap-2.5">
+          <span className="w-8 h-8 rounded-lg bg-[#8C2D19]/10 text-[#8C2D19] flex items-center justify-center shrink-0">
+            <Fingerprint className="w-4 h-4" />
+          </span>
+          <div>
+            <h3 className="font-serif font-bold text-base text-slate-900">
+              The questions people ask
+            </h3>
+            <p className="text-[11px] text-slate-600 leading-relaxed max-w-3xl mt-0.5">
+              No verse answers these outright. They are read from several placements together and
+              stated as a judgement, with the factors that decided it shown underneath.
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {synthesis.map((syn) => (
+            <SynthesisCard key={syn.id} s={syn} />
+          ))}
+        </div>
+      </section>
 
       {reading.sections
         .filter((s) => s.id !== 'gochara')
