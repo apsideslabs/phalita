@@ -6,6 +6,9 @@
  * The chart never appears here. Birth data goes in, and what comes out is the
  * astrologer's answer: svabhāva, vivāha, āyurdāya and the present gochara, each
  * line carrying the verse that produced it.
+ *
+ * Each section opens with a resolved verdict — what to follow, what was
+ * outweighed, and what was cancelled — before the evidence it rests on.
  */
 
 import React, { useMemo, useState } from 'react';
@@ -14,6 +17,8 @@ import { AyanamshaType } from '@/lib/astronomy/ayanamsha';
 import { RASHIS } from '@/lib/jyotisha/constants';
 import { buildReading, SOURCES, ALL_VERSES } from '@/lib/phalita/phala';
 import type { PhalaStatement, ReadingSection } from '@/lib/phalita/phala';
+import { buildVerdicts } from '@/lib/phalita/phala/resolve';
+import type { Verdict } from '@/lib/phalita/phala/resolve';
 import {
   BookOpen,
   Calendar,
@@ -142,7 +147,78 @@ function StatementCard({ s, showGraha }: { s: PhalaStatement; showGraha?: boolea
   );
 }
 
-function Section({ section }: { section: ReadingSection }) {
+function VerdictCard({ v }: { v: Verdict }) {
+  const net =
+    v.net === 'shubha'
+      ? { label: 'Śubha', cls: 'bg-emerald-50 text-emerald-900 border-emerald-200' }
+      : v.net === 'ashubha'
+      ? { label: 'Aśubha', cls: 'bg-rose-50 text-rose-900 border-rose-200' }
+      : v.net === 'balanced'
+      ? { label: 'Miśra', cls: 'bg-amber-50 text-amber-900 border-amber-200' }
+      : { label: '—', cls: 'bg-slate-50 text-slate-600 border-slate-200' };
+
+  return (
+    <div className="bg-slate-50/80 border border-slate-200 rounded-2xl p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
+          Verdict · {v.theme}
+        </span>
+        <span className={`px-2 py-0.5 rounded border text-[10px] font-mono uppercase tracking-wider ${net.cls}`}>
+          {net.label}
+        </span>
+        <span className="text-[10px] font-mono text-slate-500">confidence {v.confidence}</span>
+      </div>
+
+      {v.winner && (
+        <p className="mt-2 text-[12.5px] text-slate-800 leading-relaxed">
+          <span className="font-semibold">Follow: </span>
+          {v.winner.phala}
+          <span className="text-slate-500">
+            {' '}
+            ({v.winner.short}, weight {v.winner.weight})
+          </span>
+        </p>
+      )}
+
+      {v.cancelled.length > 0 && (
+        <ul className="mt-2 space-y-1">
+          {v.cancelled.map((c, i) => (
+            <li
+              key={i}
+              className="text-[11px] text-rose-800 bg-rose-50 border border-rose-200 rounded px-2 py-1 leading-snug"
+            >
+              <span className="line-through decoration-rose-400">{c.claim.short}</span> withdrawn —{' '}
+              {c.by.short} cancels it.
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {v.losers.length > 0 && (
+        <ul className="mt-2 space-y-1">
+          {v.losers.map((l, i) => (
+            <li key={i} className="text-[11px] text-slate-600 leading-snug">
+              Outweighed: {l.short} (weight {l.weight}) — {l.phala}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {v.reasoning.length > 0 && (
+        <ul className="mt-2 pt-2 border-t border-slate-200 space-y-1">
+          {v.reasoning.map((r, i) => (
+            <li key={i} className="text-[11px] text-slate-600 leading-snug">
+              · {r}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function Section({ section, chart }: { section: ReadingSection; chart: JyotishaChart }) {
+  const verdicts = buildVerdicts(chart, section.id, section.statements);
   const Icon = SECTION_ICON[section.id] ?? BookOpen;
   const [showTested, setShowTested] = useState(false);
 
@@ -159,6 +235,10 @@ function Section({ section }: { section: ReadingSection }) {
           </p>
         </div>
       </div>
+
+      {verdicts.map((v, i) => (
+        <VerdictCard key={i} v={v} />
+      ))}
 
       {section.statements.length === 0 ? (
         <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-600">
@@ -279,7 +359,7 @@ export function PhalaPanel({ chart, ayanamshaType }: PhalaPanelProps) {
       </div>
 
       {reading.sections.map((s) => (
-        <Section key={s.id} section={s} />
+        <Section key={s.id} section={s} chart={chart} />
       ))}
 
       <div className="px-1 text-[11px] text-slate-500 leading-relaxed">
