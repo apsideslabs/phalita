@@ -21,6 +21,7 @@
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
 import { GRAHA_PROPERTIES } from '@/lib/jyotisha/constants';
 import type { PhalaStatement } from './types';
+import { applyNichabhanga } from './nichabhanga';
 
 export type Theme =
   | 'character'
@@ -178,7 +179,10 @@ export function weighClaim(chart: JyotishaChart, claim: Claim): WeighedClaim {
  * and cancelled claim visible.
  */
 export function resolveTheme(theme: Theme, claims: Claim[], chart: JyotishaChart): Verdict {
-  const weighed = claims.map((c) => weighClaim(chart, c));
+  // Nīchabhanga first: a debilitated graha whose fall the text cancels must not
+  // be weighed down and left there.
+  const augmented = applyNichabhanga(chart, claims);
+  const weighed = augmented.map((c) => weighClaim(chart, c));
   const reasoning: string[] = [];
 
   // 1. Cancellations remove what they name.

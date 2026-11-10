@@ -27,6 +27,7 @@ import { PHALADIPIKA_10_VERSES } from './corpus-phaladipika-10';
 import { PHALADIPIKA_16_VERSES } from './corpus-phaladipika-16';
 import { PHALADIPIKA_06_VERSES } from './corpus-phaladipika-06';
 import { PHALADIPIKA_22_VERSES } from './corpus-phaladipika-22';
+import { PHALADIPIKA_07_VERSES } from './corpus-phaladipika-07';
 import type {
   GocharaReading,
   PhalaReport,
@@ -58,6 +59,7 @@ export const ALL_VERSES: PhalaVerse[] = [
   ...PHALADIPIKA_10_VERSES,
   ...PHALADIPIKA_16_VERSES,
   ...PHALADIPIKA_06_VERSES,
+  ...PHALADIPIKA_07_VERSES,
   ...PHALADIPIKA_22_VERSES,
   ...PHALADIPIKA_26_VERSES,
 ];
@@ -305,6 +307,12 @@ export function buildPhalaReport(
           status: 'partial',
           detail:
             'The five mahāpuruṣa yogas (6.1–6.4), the four Candra yogas of 6.5, amala (6.12) and kesarī (6.16). Chapter 7 (rājayoga) and the remaining Nābhasa yogas are not yet transcribed.',
+        },
+        {
+          name: 'Nīchabhanga — cancellation of debilitation',
+          status: 'complete',
+          detail:
+            'Phaladīpikā 7.26–7.30: the lord of the debilitation sign or of the exaltation sign in a kendra from the lagna or the Moon. Applied before any verdict is weighed.',
         },
         {
           name: 'Daśā phala — period results',
