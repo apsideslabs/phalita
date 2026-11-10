@@ -1,0 +1,3 @@
+# Phalita
+
+Initialising repository.
