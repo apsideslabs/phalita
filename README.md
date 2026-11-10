@@ -9,6 +9,9 @@ auditable predictions.
 GAṆAKA answers *what is the chart*. PHALITA answers *what does the chart say* — career,
 education, marriage, wealth, health, and the periods in which each is supported.
 
+Live at **https://apsideslabs.github.io/phalita/** · the calculation platform is at
+**https://apsideslabs.github.io/ganaka/**
+
 ## What makes a prediction here different
 
 A reading is not a sentence generated from a placement. Every verdict in this
