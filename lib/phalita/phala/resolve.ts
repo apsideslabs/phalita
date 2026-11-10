@@ -16,6 +16,11 @@
  * hierarchy — cancellation over affliction, specific over general, stronger
  * graha over weaker — and these numbers are one faithful way to compute it.
  * They are published here so they can be changed.
+ *
+ * THE CORROBORATION RULE. A claim marked fatal or serious is never stated on
+ * the strength of one condition. It needs a second condition of the same text
+ * agreeing. Without this, every chart produces an extreme reading, because
+ * every chart contains at least one affliction.
  */
 
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
@@ -59,10 +64,9 @@ export interface Claim {
   /** 3 = an exact condition of the text, 2 = a general statement, 1 = a disposition. */
   scope: number;
   /**
-   * How much the statement claims. A 'fatal' reading — loss of a spouse, death,
-   * childlessness — is never pronounced from one condition: the gate in
-   * resolveTheme withholds it unless a second condition of the same text
-   * corroborates it.
+   * How much the statement claims. 'fatal' and 'serious' readings are never
+   * pronounced from one condition — the gate in resolveTheme withholds them
+   * unless a second condition of the same text corroborates them.
    */
   severity?: 'mild' | 'serious' | 'fatal';
 }
@@ -249,12 +253,17 @@ export function resolveTheme(theme: Theme, claims: Claim[], chart: JyotishaChart
   const only = good.length ? good : bad;
   const top = only[0];
 
-  // A fatal reading needs corroboration. One condition of one verse is a
-  // warning, not a verdict — and a verdict of "loss of spouse" from a single
-  // affliction is exactly the kind of line that does damage.
-  if (top.severity === 'fatal' && only.filter((c) => c.polarity === top.polarity).length < 2) {
+  // Corroboration, not severity alone. A grave or a serious claim stands only
+  // when at least two independent conditions of the text agree. One condition
+  // is a warning; it is never a verdict. Without this, every chart produces an
+  // extreme reading, because every chart has at least one affliction.
+  const corroborating = only.filter((c) => c.polarity === top.polarity).length;
+  const needsCorroboration = top.severity === 'fatal' || top.severity === 'serious';
+  if (needsCorroboration && corroborating < 2) {
     reasoning.push(
-      `${top.short} names a grave outcome, but it is a single condition. The text gives other conditions in the same chapter that contradict it, and none of them held here. This platform does not turn one affliction into a verdict of loss, so the reading is withheld rather than pronounced.`
+      `${top.short} names a ${
+        top.severity === 'fatal' ? 'grave' : 'serious'
+      } outcome, but it stands alone here — one condition, with no second condition of the same text agreeing. The chapter gives other conditions that would confirm it, and none of them held. A single placement is a warning, not a verdict, so the reading is withheld rather than pronounced.`
     );
     return {
       theme,
@@ -343,6 +352,13 @@ const BHAVA_HOUSE: Record<string, number> = {
   'phaladipika.16.29': 11,
 };
 
+/** Verses that state a serious outcome, and so need corroboration. */
+const SERIOUS_VERSE = new Set([
+  'phaladipika.16.8',
+  'phaladipika.16.14',
+  'phaladipika.16.19',
+]);
+
 export function buildVerdicts(
   chart: JyotishaChart,
   sectionId: string,
@@ -366,6 +382,7 @@ export function buildVerdicts(
         claimsFromStatements(list, () => th).map((c) => ({
           ...c,
           hinge: lord(BHAVA_HOUSE[c.verseId] ?? 1),
+          ...(SERIOUS_VERSE.has(c.verseId) ? { severity: 'serious' as const } : {}),
         })),
         chart
       )
