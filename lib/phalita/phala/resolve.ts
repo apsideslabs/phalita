@@ -386,14 +386,18 @@ export function buildVerdicts(
 
     // The chapter argues with itself, and its own counter-verses withdraw the
     // grave reading outright: a strong benefic seventh lord (10.6), a seventh
-    // lord free of the Sun's burning (10.9), the lagna lord in the seventh
-    // (10.13) and benefic company on the seventh (10.7) all contradict it.
-    // Where any of those hold, kalatra-hāni is not the reading.
+    // lord free of the Sun's burning (10.9), and benefic company on the
+    // seventh (10.7) all contradict it.
+    //
+    // 10.13 is deliberately NOT here. Read against the printed edition (Sastri
+    // 1950, p.109) it is a TIMING verse — the daśā in which a marriage happens,
+    // or the lagna lord reaching the seventh rāśi. It says nothing about the
+    // marriage surviving, so using it to cancel kalatra-hāni was a misreading.
     const grave = claims.find(
       (c) => c.verseId === 'phaladipika.10.15' || c.verseId === 'phaladipika.10.2'
     );
     if (grave) {
-      for (const vid of ['phaladipika.10.7', 'phaladipika.10.6', 'phaladipika.10.9', 'phaladipika.10.13']) {
+      for (const vid of ['phaladipika.10.7', 'phaladipika.10.6', 'phaladipika.10.9']) {
         const counter = claims.find((c) => c.verseId === vid);
         if (counter) {
           counter.kind = 'cancellation';
