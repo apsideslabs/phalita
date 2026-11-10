@@ -18,6 +18,7 @@ import { RASHIS } from '@/lib/jyotisha/constants';
 import { buildReading, SOURCES, ALL_VERSES } from '@/lib/phalita/phala';
 import type { PhalaStatement, ReadingSection } from '@/lib/phalita/phala';
 import { buildVerdicts } from '@/lib/phalita/phala/resolve';
+import { buildDashaPhala } from '@/lib/phalita/phala/dasha';
 import type { Verdict } from '@/lib/phalita/phala/resolve';
 import {
   BookOpen,
@@ -217,6 +218,56 @@ function VerdictCard({ v }: { v: Verdict }) {
   );
 }
 
+function DashaCard({ chart, date }: { chart: JyotishaChart; date: Date }) {
+  const d = buildDashaPhala(chart, date);
+  return (
+    <section className="space-y-3">
+      <div className="flex items-start gap-2.5">
+        <span className="w-8 h-8 rounded-lg bg-[#8C2D19]/10 text-[#8C2D19] flex items-center justify-center shrink-0">
+          <Hourglass className="w-4 h-4" />
+        </span>
+        <div>
+          <h3 className="font-serif font-bold text-base text-slate-900">Daśā Phala — The Period</h3>
+          <p className="text-[11px] text-slate-600 leading-relaxed max-w-3xl mt-0.5">
+            A prediction without a period is half a prediction. This is the mahādaśā running on the
+            date shown, read from Phaladīpikā 19 — and 19.8 says the phala is read according to the
+            lord&rsquo;s strength, so it states which way that leans.
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-4">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Mahādaśā</span>
+          <span className="font-serif font-bold text-slate-900">{d.mahadasha.name}</span>
+          <span className="text-[11px] font-mono text-slate-500">
+            {d.mahadasha.start} → {d.mahadasha.end}
+          </span>
+        </div>
+        {d.antardasha && (
+          <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Antardaśā</span>
+            <span className="text-[13px] text-slate-800">{d.antardasha.name}</span>
+            <span className="text-[11px] font-mono text-slate-500">
+              {d.antardasha.start} → {d.antardasha.end}
+            </span>
+          </div>
+        )}
+        <p className="mt-2 text-[11px] text-slate-600 leading-snug">{d.strength.note}</p>
+        {d.statement ? (
+          <div className="mt-2">
+            <StatementCard s={d.statement} />
+          </div>
+        ) : (
+          <div className="mt-2 p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600">
+            {d.unstated}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function Section({ section, chart }: { section: ReadingSection; chart: JyotishaChart }) {
   const verdicts = buildVerdicts(chart, section.id, section.statements);
   const Icon = SECTION_ICON[section.id] ?? BookOpen;
@@ -358,9 +409,19 @@ export function PhalaPanel({ chart, ayanamshaType }: PhalaPanelProps) {
         </div>
       </div>
 
-      {reading.sections.map((s) => (
-        <Section key={s.id} section={s} chart={chart} />
-      ))}
+      {reading.sections
+        .filter((s) => s.id !== 'gochara')
+        .map((s) => (
+          <Section key={s.id} section={s} chart={chart} />
+        ))}
+
+      <DashaCard chart={chart} date={date} />
+
+      {reading.sections
+        .filter((s) => s.id === 'gochara')
+        .map((s) => (
+          <Section key={s.id} section={s} chart={chart} />
+        ))}
 
       <div className="px-1 text-[11px] text-slate-500 leading-relaxed">
         {ALL_VERSES.length} verses held · {source.title} (Mantreśvara, {source.period}) · e-text
