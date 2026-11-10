@@ -13,6 +13,7 @@
  */
 
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
+import { buildQuestions } from './questions';
 
 export interface SynthesisFactor {
   label: string;
@@ -256,5 +257,6 @@ export function marriageMode(chart: JyotishaChart): Synthesis {
 }
 
 export function buildSynthesis(chart: JyotishaChart): Synthesis[] {
-  return [careerMode(chart), marriageMode(chart)];
+  // The two detailed readings first, then the wider catalogue of questions.
+  return [careerMode(chart), marriageMode(chart), ...buildQuestions(chart)];
 }
