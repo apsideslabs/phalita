@@ -14,6 +14,9 @@ const MAL: PlanetId[] = ['sun', 'mars', 'saturn', 'rahu', 'ketu'];
 const KENDRA = [1, 4, 7, 10];
 const DUS = [6, 8, 12];
 
+/** Questions grave enough that one placement must never answer them. */
+const SENSITIVE = new Set(['divorce', 'accident', 'second-marriage', 'surgery', 'adoption']);
+
 const dig = (d: string) =>
   d === 'Exalted (Ucca)' ? 3
   : d === 'Moolatrikona' ? 2.5
@@ -40,25 +43,31 @@ export function buildQuestions2(chart: JyotishaChart): Question[] {
     rules: [('a' | 'b'), number, string, string][]
   ) => {
     const f: QFactor[] = [];
-    let sa = 0, sb2 = 0;
+    let sa = 0, sb2 = 0, ca = 0, cb = 0;
     for (const [side, w, label, ground] of rules) {
       if (w <= 0) continue;
-      if (side === 'a') sa += w; else sb2 += w;
+      if (side === 'a') { sa += w; ca += 1; } else { sb2 += w; cb += 1; }
       f.push({ label, side, weight: Math.round(w * 10) / 10, ground });
     }
     const m = Math.abs(sa - sb2);
     const lead = sa >= sb2 ? a : b;
+    // A grave question is not answered by one placement. If only one condition
+    // supports the leading side, the engine says it cannot call it — otherwise
+    // every chart yields an extreme reading, since every chart has an affliction.
+    const winning = sa >= sb2 ? ca : cb;
+    const thin = SENSITIVE.has(id) && winning < 2;
     out.push({
       id, domain, question, a, b,
       aScore: Math.round(sa * 10) / 10,
       bScore: Math.round(sb2 * 10) / 10,
-      answer:
-        m < 1.5
-          ? `Split. The chart does not settle this — it reads almost evenly between ${a.toLowerCase()} and ${b.toLowerCase()}.`
-          : m < 4
-          ? `Leaning: ${lead}. The indications are not one-sided, but the balance sits there.`
-          : `${lead} — and clearly so.`,
-      confidence: m < 1.5 ? 'mixed' : m < 4 ? 'leaning' : 'clear',
+      answer: thin
+        ? `Not enough to call. One placement points towards "${lead}", and nothing else in the chart corroborates it. A question this serious is not settled by a single condition, so this platform withholds it rather than pronouncing it.`
+        : m < 1.5
+        ? `Split. The chart does not settle this — it reads almost evenly between ${a.toLowerCase()} and ${b.toLowerCase()}.`
+        : m < 4
+        ? `Leaning: ${lead}. The indications are not one-sided, but the balance sits there.`
+        : `${lead} — and clearly so.`,
+      confidence: thin || m < 1.5 ? 'mixed' : m < 4 ? 'leaning' : 'clear',
       factors: f,
       caveat:
         'Synthesis, not a quotation. No verse answers this question outright — the judgement is built from the significations the texts give the houses and grahas, and the weights are shown so you can disagree with any line of it.',
