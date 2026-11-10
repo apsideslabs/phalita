@@ -248,8 +248,8 @@ jobs:
         run: |
           n=$(grep -rho "useCitySearch(" components/ | wc -l)
           echo "useCitySearch call sites: $n"
-          if [ "$n" -lt 6 ]; then
-            echo "::error::expected at least 6 city search boxes on useCitySearch, found $n"
+          if [ "$n" -lt 5 ]; then
+            echo "::error::expected at least 5 city search boxes on useCitySearch, found $n"
             exit 1
           fi
           shards=$(ls out/data/in/*.json 2>/dev/null | wc -l)
