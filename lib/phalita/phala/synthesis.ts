@@ -14,6 +14,7 @@
 
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
 import { buildQuestions } from './questions';
+import { buildQuestions2 } from './questions2';
 
 export interface SynthesisFactor {
   label: string;
@@ -194,14 +195,12 @@ export function marriageMode(chart: JyotishaChart): Synthesis {
   let love = 0;
   let arranged = 0;
 
-  // Venus and the Moon together: the classical signature of attraction.
   const venusMoon = chart.planets.venus.house === chart.planets.moon.house;
   if (venusMoon) {
     love += 2.5;
-    factors.push({ label: 'Venus and the Moon in one house — attraction leads the choice', side: 'a', weight: 2.5, ground: 'Phaladīpikā 9.7, the Moon daśā of union and pleasure; Venus as kāraka of marriage' });
+    factors.push({ label: 'Venus and the Moon in one house — attraction leads the choice', side: 'a', weight: 2.5, ground: 'Phaladīpikā 9.7; Venus as kāraka of marriage' });
   }
 
-  // Venus aspecting the seventh, or sitting in it.
   if (occ7.includes('venus')) {
     love += 3;
     factors.push({ label: 'Venus in the seventh — the partner is chosen for love', side: 'a', weight: 3, ground: 'Phaladīpikā 10.7, benefic company on the seventh' });
@@ -211,7 +210,6 @@ export function marriageMode(chart: JyotishaChart): Synthesis {
     factors.push({ label: 'Rāhu in the seventh — a match outside the family’s expectation', side: 'a', weight: 2, ground: 'Phaladīpikā 19.15, the Rāhu daśā of unconventional fortune' });
   }
 
-  // The fifth house is romance; a link between fifth and seventh is love-led.
   if (p7 && (p7.house === 5 || p7.house === 11)) {
     love += 2;
     factors.push({ label: `seventh lord in house ${p7.house} — the partner comes from your own circle`, side: 'a', weight: 2, ground: 'Phaladīpikā 16.20' });
@@ -225,7 +223,6 @@ export function marriageMode(chart: JyotishaChart): Synthesis {
     factors.push({ label: 'Venus or the Moon in the fifth — a romantic temperament', side: 'a', weight: 1.5, ground: 'Phaladīpikā 9.7' });
   }
 
-  // Jupiter and a well-placed seventh lord: the family-sanctioned match.
   const jupAspects7 = (chart.planets.jupiter.aspectsToHouses ?? []).includes(7);
   if (jupAspects7) {
     arranged += 2.5;
@@ -258,5 +255,5 @@ export function marriageMode(chart: JyotishaChart): Synthesis {
 
 export function buildSynthesis(chart: JyotishaChart): Synthesis[] {
   // The two detailed readings first, then the wider catalogue of questions.
-  return [careerMode(chart), marriageMode(chart), ...buildQuestions(chart)];
+  return [careerMode(chart), marriageMode(chart), ...buildQuestions(chart), ...buildQuestions2(chart)];
 }
