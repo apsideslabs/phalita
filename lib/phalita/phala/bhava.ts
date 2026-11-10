@@ -4,6 +4,10 @@
  * Every rule here is a condition of Phaladīpikā 16 tested against the chart.
  * The order is the order of the houses: body, wealth, siblings, home, children,
  * health, spouse, longevity, fortune, career, gains.
+ *
+ * Each statement is written as the conclusion a person can act on. The
+ * condition that produced it is carried in the citation and shown under the
+ * line, so the working is available without being the answer.
  */
 
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
@@ -68,13 +72,13 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       `lagna lord ${p1.name} in ${p1.dignity}, house ${p1.house}`,
       GOOD.includes(p1.dignity)
         ? {
-            phala: `The lagna lord stands well placed in ${p1.rashiName}: the text gives a happy and growing life, and in its own or exalted sign an energetic, prosperous one.`,
+            phala: `Your constitution is sound and your life grows steadily rather than by sudden turns. You recover from setbacks faster than most, and people read you as capable before you have said much.`,
             tone: 'shubha',
             keywords: [],
             citation: citationOf('phaladipika.16.4'),
           }
         : {
-            phala: `The lagna lord is in debilitation: the text gives residence in an inferior place and a life lived at a distance from its own station.`,
+            phala: `Your vitality runs below your apparent strength, and you are likely to live and work at some distance from the station you were born into. Energy has to be managed rather than spent.`,
             tone: 'ashubha',
             keywords: [],
             citation: citationOf('phaladipika.16.4'),
@@ -95,10 +99,10 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       `2nd lord ${p2.name} in house ${p2.house}; Sun in 2nd: ${withSun}; Saturn in 2nd: ${withSaturn}`,
       {
         phala: withSaturn
-          ? 'The lord of wealth sits in the second, but Saturn’s company turns it toward meagre means and little learning.'
+          ? 'Money stays tight and formal education is short — what you earn comes slowly and is held by discipline rather than by opportunity. You are likely to be self-taught in what actually pays you.'
           : withSun
-          ? 'The lord of wealth sits in the second with the Sun: the text gives both learning and wealth.'
-          : 'The lord of wealth sits in its own bhāva: the text gives wealth, family honour, a good name and far sight.',
+          ? 'Money and learning arrive together: what you study turns into income, and your speech carries weight in negotiations.'
+          : 'You keep what you earn. Family standing supports you, your word is taken seriously in money matters, and you tend to see a financial situation clearly before others do.',
         tone: withSaturn ? 'ashubha' : 'shubha',
         keywords: [],
         citation: citationOf('phaladipika.16.5'),
@@ -117,8 +121,8 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       `3rd lord ${p3.name} in ${p3.dignity}, house ${p3.house}`,
       {
         phala: strong3
-          ? 'The lord of siblings is strong and well associated, so the text gives increase of brothers and sisters.'
-          : 'The lord of siblings is weak and in a duḥsthāna, so the text gives loss of siblings.',
+          ? 'Siblings and peers multiply your strength — you are likely to rise with a network rather than alone, and courage comes easily to you.'
+          : 'Siblings are a point of loss rather than support — distance, estrangement, or their absence. You build courage on your own rather than through a group.',
         tone: strong3 ? 'shubha' : 'ashubha',
         keywords: [],
         citation: citationOf('phaladipika.16.8'),
@@ -138,7 +142,7 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       'Phaladīpikā 16.13',
       `4th lord ${p4.name} in ${p4.dignity}; Venus in ${venus.dignity}`,
       {
-        phala: 'The lord of the fourth and Venus both stand well: the text gives vehicles, a seat of authority, gold and gems, ornaments, fine beds, and cattle, elephants and horses.',
+        phala: 'Property and comfort accumulate: a good house, vehicles, and the means to furnish a life well. You end up with a seat of some authority at home, and the family home becomes the base everything else is built on.',
         tone: 'shubha',
         keywords: [],
         citation: citationOf('phaladipika.16.13'),
@@ -149,7 +153,7 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       'Phaladīpikā 16.14',
       `4th lord ${p4.name} in house ${p4.house}; Mars or Sun in the 4th: ${occupants(4).filter((o) => o === 'mars' || o === 'sun').length > 0}`,
       {
-        phala: 'The lord of the fourth is afflicted and Mars or the Sun burns the fourth: the text gives a burnt or ruined house, and property lost to others.',
+        phala: 'The home is the weak point — property damaged, lost, or taken by others, and a childhood that was unsettled. Domestic peace has to be built deliberately rather than inherited.',
         tone: 'ashubha',
         keywords: [],
         citation: citationOf('phaladipika.16.14'),
@@ -167,7 +171,7 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       'Phaladīpikā 16.15',
       `5th lord ${p5.name} in ${p5.dignity}; benefic company in the 5th: ${beneficCompany}`,
       {
-        phala: 'The fifth lord is in benefic company: the text gives intelligence and a nature free of deceit.',
+        phala: 'Intelligence is your strongest asset and it is honest — you reason your way to conclusions and people trust what you say because you are not performing. Children and creative work come easily.',
         tone: 'shubha',
         keywords: [],
         citation: citationOf('phaladipika.16.15'),
@@ -185,7 +189,7 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       'Phaladipika 16.17',
       `lagna lord ${str(L1).toFixed(1)} vs 6th lord ${str(L6).toFixed(1)} virūpas`,
       {
-        phala: 'The lagna lord outweighs the sixth lord: the text gives health and a firm body.',
+        phala: 'Your body resists illness better than the average chart. Disease comes and goes without taking root, and recovery is quick.',
         tone: 'shubha',
         keywords: [],
         citation: citationOf('phaladipika.16.17'),
@@ -196,7 +200,7 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       'Phaladīpikā 16.18',
       `6th lord ${p6.name} in house ${p6.house}; lagna lord stronger: ${lagnaStronger}`,
       {
-        phala: 'The sixth lord has fallen into a duḥsthāna while the lagna lord holds strength, so the text gives destruction of enemies.',
+        phala: 'Opposition does not last against you — rivals weaken on their own, and legal or professional adversaries tend to lose ground.',
         tone: 'shubha',
         keywords: [],
         citation: citationOf('phaladipika.16.18'),
@@ -216,9 +220,9 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
     `bhāveśas placed in the 6th: ${hostile.join(', ') || 'none'}`,
     hostile.length > 0
       ? {
-          phala: `The lord of house ${hostile.join(', ')} has fallen into the sixth, and the text says those bhāvas become hostile — the matter of ${
-            hostile.map((h) => HOUSE_NAME[Number(h)]).join('; ')
-          } is turned against the native.`,
+          phala: `The area of ${hostile
+            .map((h) => HOUSE_NAME[Number(h)])
+            .join(', ')} works against you rather than for you. These are the parts of life where effort returns less than it should, and where problems arrive from the outside.`,
           tone: 'ashubha',
           keywords: [],
           citation: citationOf('phaladipika.16.19'),
@@ -236,7 +240,7 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       'Phaladīpikā 16.20',
       `7th lord ${p7.name} in ${p7.dignity}, benefic: ${BENEFICS.includes(L7!)}`,
       {
-        phala: 'The seventh lord is strong and benefic, and the text gives a wife who has a husband and a son, and is endowed with good qualities.',
+        phala: 'Marriage is a settled and supportive matter for you — a partner of good character, a household that holds, and children within it.',
         tone: 'shubha',
         keywords: [],
         citation: citationOf('phaladipika.16.20'),
@@ -255,7 +259,7 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       'Phaladīpikā 16.21',
       `8th lord ${p8.name} in house ${p8.house}; ${str(L8).toFixed(1)} vs lagna lord ${str(L1).toFixed(1)}`,
       {
-        phala: 'The eighth lord stands outside the kendras and weaker than the lagna lord: the text gives long life, and freedom from distress, obstruction and affliction.',
+        phala: 'Longevity is well supported and life runs without the chronic obstruction that shortens other charts. You are likely to outlast the difficulties that surround you.',
         tone: 'shubha',
         keywords: [],
         citation: citationOf('phaladipika.16.21'),
@@ -274,7 +278,7 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       'Phaladīpikā 16.27',
       `10th lord ${p10.name} in house ${p10.house} (${p10.dignity})`,
       {
-        phala: 'The tenth lord is strong in a kendra or a koṇa and in its own or exalted sign: the text gives wide fame, a life of dharma and work, fortune like a king’s, and long life.',
+        phala: 'Career is where you are strongest. Standing, reputation and material fortune all come through work done publicly, and you are recognised for it in your own circle and beyond.',
         tone: 'shubha',
         keywords: [],
         citation: citationOf('phaladipika.16.27'),
@@ -286,7 +290,9 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       'Phaladīpikā 16.28',
       `Sun or Mars in the 10th: ${sunOrMars.map((o) => GRAHA_PROPERTIES[o]?.name ?? o).join(', ') || 'none'}`,
       {
-        phala: `${sunOrMars.map((o) => GRAHA_PROPERTIES[o]?.name ?? o).join(' and ')} in the tenth: the text gives the accomplishing of great works with much prowess, and a following among people.`,
+        phala: `Work is where your force shows: ${sunOrMars
+          .map((o) => GRAHA_PROPERTIES[o]?.name ?? o)
+          .join(' and ')} in the tenth gives you the capacity to drive large things through by will, and to gather people behind you.`,
         tone: 'shubha',
         keywords: [],
         citation: citationOf('phaladipika.16.28'),
@@ -307,9 +313,9 @@ export function evaluateBhavas(chart: JyotishaChart): BhavaResult {
       `11th lord ${p11.name} in house ${p11.house}; bhāveśas in that house: ${joined.map((j) => j.h).join(', ') || 'none'}`,
       joined.length > 0
         ? {
-            phala: `The lord of gains sits with the lord of house ${joined.map((j) => j.h).join(', ')}, so the text gives gain of things belonging to ${
-              joined.map((j) => HOUSE_NAME[j.h]).join('; ')
-            }.`,
+            phala: `Income reaches you through ${joined
+              .map((j) => HOUSE_NAME[j.h])
+              .join(', ')} — the things you already hold and the people already around you, rather than through a single salary.`,
             tone: 'shubha',
             keywords: [],
             citation: citationOf('phaladipika.16.29'),
