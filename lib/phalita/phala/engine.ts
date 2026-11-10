@@ -24,6 +24,8 @@ import { AyanamshaType } from '@/lib/astronomy/ayanamsha';
 import { PHALADIPIKA_26_VERSES, PHALADIPIKA_26_ROWS } from './corpus-phaladipika-26';
 import { PHALADIPIKA_09_VERSES, PHALADIPIKA_09_RASHIS } from './corpus-phaladipika-09';
 import { PHALADIPIKA_10_VERSES } from './corpus-phaladipika-10';
+import { PHALADIPIKA_16_VERSES } from './corpus-phaladipika-16';
+import { PHALADIPIKA_06_VERSES } from './corpus-phaladipika-06';
 import { PHALADIPIKA_22_VERSES } from './corpus-phaladipika-22';
 import type {
   GocharaReading,
@@ -54,6 +56,8 @@ export const SOURCES: PhalaSource[] = [
 export const ALL_VERSES: PhalaVerse[] = [
   ...PHALADIPIKA_09_VERSES,
   ...PHALADIPIKA_10_VERSES,
+  ...PHALADIPIKA_16_VERSES,
+  ...PHALADIPIKA_06_VERSES,
   ...PHALADIPIKA_22_VERSES,
   ...PHALADIPIKA_26_VERSES,
 ];
@@ -292,9 +296,15 @@ export function buildPhalaReport(
         },
         {
           name: 'Bhāva phala — the twelve houses',
-          status: 'pending',
+          status: 'partial',
           detail:
-            'Phaladīpikā 8 (bhāvāśraya) and 15–16 (dvādaśa-bhāva-phala) are not yet transcribed into the corpus.',
+            'Fourteen conditions of Phaladīpikā 16 across body, wealth, siblings, home, children, health, marriage, longevity, career and gains. The rest of the chapter (16.6–16.12, 16.22–16.26) needs the father, mother and putra-kāraka logic, which is not yet evaluated.',
+        },
+        {
+          name: 'Yogas — combinations',
+          status: 'partial',
+          detail:
+            'The five mahāpuruṣa yogas (6.1–6.4), the four Candra yogas of 6.5, amala (6.12) and kesarī (6.16). Chapter 7 (rājayoga) and the remaining Nābhasa yogas are not yet transcribed.',
         },
         {
           name: 'Daśā phala — period results',
