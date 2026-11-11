@@ -1,0 +1,147 @@
+/* PHALITA — one stylesheet, no utility framework.
+   Editorial: paper, ink, a single accent. Type does the work. */
+
+:root {
+  --ink: #1c1917;
+  --ink-soft: #57534e;
+  --ink-faint: #a8a29e;
+  --paper: #fdfcfa;
+  --rule: #e7e5e4;
+  --accent: #8c2d19;
+  --good: #2f6b4f;
+  --bad: #9a3b2c;
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.page {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 6rem;
+}
+
+/* ---- masthead ---- */
+
+.masthead { padding-bottom: 1.5rem; border-bottom: 1px solid var(--rule); }
+.masthead .kicker {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+}
+.masthead h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0.4rem 0 0;
+}
+.masthead .sub { margin: 0.3rem 0 0; font-size: 0.85rem; color: var(--ink-soft); }
+.masthead .dasha {
+  margin: 1.25rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--ink-soft);
+}
+
+/* ---- chapters ---- */
+
+.chapter { margin-top: 3rem; }
+.chapter h2 { font-size: 1.2rem; font-weight: 600; margin: 0; }
+.chapter .strap {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0.2rem 0 0;
+}
+.chapter .body {
+  margin-top: 0.9rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--rule);
+}
+.chapter.strong .body { border-left-color: #cfe4d8; }
+.chapter.strained .body { border-left-color: #ecd5d0; }
+.chapter p { margin: 0 0 0.85rem; font-size: 1rem; line-height: 1.85; }
+.chapter p:last-child { margin-bottom: 0; }
+
+/* ---- form ---- */
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.form label { display: flex; flex-direction: column; gap: 0.3rem; }
+.form span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.form input {
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: #fff;
+  color: var(--ink);
+}
+.form input:focus { outline: none; border-color: var(--accent); }
+.form button {
+  grid-column: 1 / -1;
+  justify-self: start;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.6rem 1.4rem;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+.form button:hover { background: #6f2314; }
+
+/* ---- catalogue ---- */
+
+details.catalogue { margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
+details.catalogue summary {
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+details.catalogue summary:hover { color: var(--accent); }
+
+.foot {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--ink-faint);
+}
+
+.quiet { color: var(--ink-soft); font-style: italic; }

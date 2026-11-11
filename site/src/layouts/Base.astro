@@ -1,0 +1,23 @@
+---
+import '../styles/app.css';
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · Phalita</title>
+    <meta name="description" content="A reading of the birth chart, drawn from Phaladīpikā verse by verse." />
+  </head>
+  <body>
+    <main class="page">
+      <slot />
+    </main>
+  </body>
+</html>
