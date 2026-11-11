@@ -10,11 +10,19 @@
 </head>
 <body>
 
+<div class="topbar">
+  <div class="inner">
+    <span class="ic">🎁</span>
+    <p>Shaadi kab hogi? Find out</p>
+    <a href="./reading.html">Check Now →</a>
+  </div>
+</div>
+
 <header class="nav">
   <div class="inner">
     <a class="brand" href="./index.html"><span class="deva">फल</span> Phalita<span class="dot">.</span></a>
     <input type="checkbox" id="navtoggle" class="toggle" />
-    <label for="navtoggle" class="burger" aria-label="Open menu"><span></span><span></span><span></span></label>
+    <label for="navtoggle" class="burger"><span class="bars"><span></span><span></span><span></span></span> Menu</label>
     <nav class="links">
       <a href="./about.html">About</a>
       <a href="./sources.html">Sources</a>
@@ -23,42 +31,38 @@
   </div>
 </header>
 
-<section class="hero2">
-  <div class="grid2">
-    <div class="copy">
-      <p class="kicker">फल · phala · the fruit of the chart</p>
-      <h1>Your chart, read the way an <em>astrologer</em> reads it.</h1>
-      <p class="lede">
-        Ten chapters on your life — work, money, marriage, children, home, body,
-        mind, fortune, family and dharma. Every line is a condition Phaladīpikā
-        states, tested against your chart, and every line carries its verse.
-      </p>
-      <ul class="marks">
-        <li>91 verses transcribed</li>
-        <li>Checked against the 1950 print</li>
-        <li>No death date, ever</li>
-      </ul>
-    </div>
+<section class="vh">
+  <div class="inner">
+    <p class="badge"><span class="ic">✦</span> Premium vedic guidance</p>
+    <h1>
+      Your free, in-depth<br />Kundli,
+      <em>straight from your date of birth.</em>
+    </h1>
+    <p class="lede">
+      Enter your birth date to unlock a complete Vedic reading — your personality,
+      career, love and life path, built on precise calculations from Phaladīpikā.
+    </p>
 
-    <form class="hero-form" id="quick" action="./reading.html" method="get">
-      <h2>Read your chart</h2>
-      <p class="tiny">Takes about a minute. Nothing is stored.</p>
-
-      <div class="frow">
-        <label><span>Date</span><input type="date" name="date" value="1990-08-15" required /></label>
-        <label><span>Time</span><input type="time" name="time" value="06:45" required /></label>
+    <form class="vform" id="quick" action="./reading.html" method="get">
+      <div class="frow two">
+        <label><span>Date of birth</span><input type="date" name="date" value="1990-08-15" required /></label>
+        <label><span>Time of birth</span><input type="time" name="time" value="06:45" required /></label>
       </div>
-      <div class="frow">
+      <div class="frow two">
         <label><span>Latitude</span><input type="number" name="lat" step="0.0001" value="26.1844" required /></label>
         <label><span>Longitude</span><input type="number" name="lon" step="0.0001" value="91.7458" required /></label>
       </div>
-      <div class="frow one">
+      <div class="frow">
         <label><span>UTC offset</span><input type="number" name="tz" step="0.25" value="5.5" required /></label>
       </div>
-
-      <button type="submit">Read the chart →</button>
-      <p class="note">Computed in your browser. Nothing leaves it.</p>
+      <button type="submit">Read My Kundli</button>
     </form>
+
+    <div class="chips">
+      <a href="./reading.html"><span class="ic">🗓</span> Today's reading</a>
+      <a href="./reading.html#marriage"><span class="ic">♡</span> Match making</a>
+      <a href="./sources.html"><span class="ic">💬</span> How it works</a>
+    </div>
   </div>
 </section>
 
@@ -109,7 +113,7 @@
     </div>
     <div class="panel">
       <div class="ptitle"><b>Phaladīpikā 10.15</b><i>adhyāya 10 · śloka 15</i></div>
-      <p class="mula" style="font-size:0.95rem;line-height:2;">कलत्रनाथे रिपुनीचसंस्थे मूढेऽथवा पापनिरीक्षिते वा ।<br />कलत्रभे पापयुतेऽथ दृष्टे कलत्रहानीं प्रवदन्ति सन्तः ॥</p>
+      <p style="font-size:0.95rem;line-height:2;">कलत्रनाथे रिपुनीचसंस्थे मूढेऽथवा पापनिरीक्षिते वा ।<br />कलत्रभे पापयुतेऽथ दृष्टे कलत्रहानीं प्रवदन्ति सन्तः ॥</p>
       <p style="margin-top:0.9rem;font-size:0.82rem;color:var(--ink-faint);">The verse names a configuration, not a single clause — which is why the engine withholds it when only one condition holds.</p>
     </div>
   </div>
@@ -169,7 +173,7 @@
     <h2>Ready to read your chart?</h2>
     <p>Takes a birth date, time and place. The reading is generated in your browser — nothing is stored.</p>
     <div class="actions">
-      <a class="btn primary" href="./reading.html">Read your chart →</a>
+      <a class="btn primary" href="./reading.html">Read My Kundli →</a>
     </div>
   </div>
 </section>
