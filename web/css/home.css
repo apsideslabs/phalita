@@ -6,10 +6,10 @@
 .hero2 {
   position: relative; overflow: hidden; padding: 4.5rem 0 4rem;
   background:
-    radial-gradient(46rem 24rem at 86% -12%, rgba(176, 132, 40, 0.20), transparent 62%),
-    radial-gradient(40rem 22rem at 4% 10%, rgba(140, 45, 25, 0.10), transparent 60%),
-    repeating-linear-gradient(135deg, rgba(140, 45, 25, 0.026) 0 1px, transparent 1px 14px),
-    linear-gradient(180deg, #fffdf9 0%, var(--paper) 78%);
+    radial-gradient(46rem 24rem at 86% -12%, rgba(194, 118, 42, 0.16), transparent 62%),
+    radial-gradient(40rem 22rem at 4% 10%, rgba(36, 53, 110, 0.11), transparent 60%),
+    repeating-linear-gradient(135deg, rgba(36, 53, 110, 0.026) 0 1px, transparent 1px 14px),
+    linear-gradient(180deg, #ffffff 0%, var(--paper) 78%);
   border-bottom: 1px solid var(--rule);
 }
 .hero2 .grid2 {
@@ -24,7 +24,7 @@
 }
 .hero2 h1 em {
   font-style: normal; color: var(--maroon);
-  background: linear-gradient(180deg, transparent 62%, rgba(176, 132, 40, 0.30) 62%);
+  background: linear-gradient(180deg, transparent 62%, rgba(194, 118, 42, 0.28) 62%);
 }
 .hero2 .lede {
   margin: 1.3rem 0 0; font-size: 1.02rem; line-height: 1.75;
@@ -41,7 +41,7 @@
 .hero-form {
   background: var(--card); border: 1px solid var(--rule);
   border-radius: 16px; padding: 1.6rem 1.6rem 1.5rem;
-  box-shadow: 0 2px 4px rgba(28,26,23,0.04), 0 26px 60px -30px rgba(28,26,23,0.34);
+  box-shadow: 0 2px 4px rgba(21,26,45,0.05), 0 26px 60px -30px rgba(21,26,45,0.38);
 }
 .hero-form h2 {
   font-family: var(--serif); font-size: 1.15rem; font-weight: 600; margin: 0;
@@ -66,7 +66,7 @@
 .hero-form button {
   width: 100%; margin-top: 0.4rem; padding: 0.8rem 1rem;
   border: 0; border-radius: 10px; cursor: pointer;
-  background: linear-gradient(180deg, #9c3520 0%, var(--maroon) 100%);
+  background: linear-gradient(180deg, #2f4585 0%, var(--maroon) 100%);
   color: #fff; font-size: 0.9rem; font-weight: 600; font-family: var(--sans);
   box-shadow: 0 1px 0 rgba(255,255,255,0.16) inset;
 }
@@ -92,7 +92,7 @@
 /* ---- alternating feature rows ---- */
 
 .feature { padding: 4.5rem 0; border-bottom: 1px solid var(--rule); }
-.feature.alt { background: linear-gradient(180deg, var(--paper-2) 0%, #fbf6ec 100%); }
+.feature.alt { background: linear-gradient(180deg, var(--paper-2) 0%, #f2f4fa 100%); }
 .feature .inner {
   max-width: 70rem; margin: 0 auto; padding: 0 1.5rem;
   display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: center;
@@ -117,7 +117,7 @@
 /* the visual panel beside the copy */
 .panel {
   background: var(--card); border: 1px solid var(--rule); border-radius: 16px;
-  padding: 1.5rem; box-shadow: 0 2px 4px rgba(28,26,23,0.04), 0 24px 56px -32px rgba(28,26,23,0.30);
+  padding: 1.5rem; box-shadow: 0 2px 4px rgba(21,26,45,0.05), 0 24px 56px -32px rgba(21,26,45,0.34);
 }
 .panel .ptitle {
   display: flex; align-items: center; justify-content: space-between;
