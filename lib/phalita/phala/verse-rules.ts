@@ -5,10 +5,9 @@
  * against the chart. They run after the general findings and either adjust one
  * or add their own, always carrying the verse that produced them.
  *
- * Fourteen of the thirty-three audited rules are here. The remainder need chart
- * data this engine does not expose yet — bhāva cusp degrees (15.14), drekkāṇa
- * lords (15.7), upacaya classes (15.18), mūlatrikoṇa positions (15.11) — and are
- * left unimplemented rather than approximated.
+ * Seventeen of the thirty-three audited rules are here. The remainder need data
+ * this engine does not expose — bhāva cusp degrees (15.14), drekkāṇa lords
+ * (15.7) — and are left unimplemented rather than approximated.
  */
 
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
@@ -21,6 +20,10 @@ const OWN: Record<string, number[]> = {
   sun: [5], moon: [4], mars: [1, 8], mercury: [3, 6],
   jupiter: [9, 12], venus: [2, 7], saturn: [10, 11],
 };
+/** Mūlatrikoṇa sign of each graha — fixed, so 15.11 needs no new data. */
+const MULA: Record<string, number> = {
+  sun: 5, moon: 2, mars: 1, mercury: 6, jupiter: 9, venus: 7, saturn: 11,
+};
 const ENEMY: Record<string, string[]> = {
   sun: ['venus', 'saturn'],
   moon: [],
@@ -32,6 +35,7 @@ const ENEMY: Record<string, string[]> = {
 };
 const SEVEN: PlanetId[] = ['sun', 'moon', 'mars', 'mercury', 'jupiter', 'venus', 'saturn'];
 const DUST = [6, 8, 12];
+const UPACAYA = [3, 6, 10, 11];
 
 const lordOf = (c: JyotishaChart, h: number) =>
   c.bhavas[h - 1]?.rashiLord as PlanetId | undefined;
@@ -54,16 +58,23 @@ const meanBala = (c: JyotishaChart): number => {
 };
 
 const rel = (other: number, h: number) => ((other - h + 12) % 12) + 1;
+
 const dignified = (c: JyotishaChart, p: PlanetId | undefined): boolean => {
   if (!p) return false;
-  const d = String(c.planets[p]?.dignity ?? '');
-  return /Exalted|Moolatrikona|Own Sign|Great Friend/.test(d);
+  return /Exalted|Moolatrikona|Own Sign|Great Friend/.test(String(c.planets[p]?.dignity ?? ''));
 };
 
 const housesRuledBy = (c: JyotishaChart, p: PlanetId): number[] => {
   const out: number[] = [];
   for (let h = 1; h <= 12; h++) if (c.bhavas[h - 1]?.rashiLord === p) out.push(h);
   return out;
+};
+
+/** True when a planet sits within a degree of either edge of its sign. */
+const atSandhi = (c: JyotishaChart, p: PlanetId): boolean => {
+  const deg = c.planets[p]?.longitudeInRashi;
+  if (typeof deg !== 'number') return false;
+  return deg < 1 || deg > 29;
 };
 
 export function applyVerseRules(
@@ -113,15 +124,49 @@ export function applyVerseRules(
       ground: 'Phaladīpikā 15.5' });
   }
 
+  // ---- 15.11 — the mūlatrikoṇa house is primary --------------------------
+  if (lord && lordHouse) {
+    const ruled = housesRuledBy(chart, lord);
+    if (ruled.length === 2) {
+      const mulaSign = MULA[lord] ?? 0;
+      const primary = ruled.find((h) => chart.bhavas[h - 1]?.rashiNumber === mulaSign);
+      const secondary = ruled.find((h) => h !== primary);
+      if (secondary === bhava) {
+        out.push({ side: 'b', weight: 1.1,
+          text: `${lord} rules two houses, and this is the secondary one — 15.11 makes the mūlatrikoṇa sign's house primary, so the lord gives this house less than it gives the other`,
+          ground: 'Phaladīpikā 15.11' });
+      }
+    }
+  }
+
+  // ---- 15.13 — a planet at sandhi gives no result ------------------------
+  const sandhi = occupants.filter((p) => atSandhi(chart, p));
+  if (sandhi.length) {
+    out.push({ side: 'b', weight: 1.4,
+      text: `${sandhi.join(', ')} sit${sandhi.length === 1 ? 's' : ''} at the edge of ${sandhi.length === 1 ? 'its' : 'their'} sign — 15.13 says even an exalted planet at a sandhi gives no result. Measured as within one degree of the sign boundary, which is an approximation of sandhi rather than a computed cusp`,
+      ground: 'Phaladīpikā 15.13 (sandhi approximated)' });
+  }
+
   // ---- 15.12 — a great enemy of the lord, sitting in the house -----------
   if (lord) {
     const foes = ENEMY[lord] ?? [];
     const foe = occupants.find((p) => foes.includes(p));
     if (foe) {
       out.push({ side: 'b', weight: 1.5,
-        text: `${foe} sits in this house and is a natural enemy of its lord ${lord} — 15.12 counts enmity between the occupant and the lord, not the occupant's own dignity`,
+        text: `${foe} sits in this house and is a natural enemy of its lord ${lord} — 15.12 counts enmity between occupant and lord, not the occupant's own dignity`,
         ground: 'Phaladīpikā 15.12' });
     }
+  }
+
+  // ---- 15.18 — Satya's reversal, kept as an attributed view -------------
+  const upacaya = MAL.filter((p) => {
+    const h = chart.planets[p]?.house;
+    return h && UPACAYA.includes(rel(h, bhava));
+  });
+  if (upacaya.length) {
+    out.push({ side: 'a', weight: 1.0,
+      text: `Satya's view, which 15.18 records separately: malefics in the upacaya houses from a bhāva — here ${upacaya.join(', ')} — are said to raise it rather than damage it, the reverse of 15.4. Kept beside that rule, not in place of it`,
+      ground: 'Phaladīpikā 15.18 (attributed view)' });
   }
 
   // ---- 15.27 — lagna lord joined to a house lord -------------------------
@@ -146,11 +191,8 @@ export function applyVerseRules(
 
   // ---- 12.1 — what supports children ------------------------------------
   if (bhava === 5) {
-    const jup = dignified(chart, 'jupiter');
-    const moon = dignified(chart, 'moon');
-    const lagnaOk = dignified(chart, lagnaLord);
-    const lordOk = dignified(chart, lord);
-    const count = [jup, moon, lagnaOk, lordOk].filter(Boolean).length;
+    const count = [dignified(chart, 'jupiter'), dignified(chart, 'moon'),
+      dignified(chart, lagnaLord), dignified(chart, lord)].filter(Boolean).length;
     if (count >= 3) {
       out.push({ side: 'a', weight: 2.0,
         text: `${count} of the four significators 12.1 names are well placed — Jupiter, the Moon, the lagna lord and the fifth lord — which the verse reads as children supported`,
@@ -181,8 +223,7 @@ export function applyVerseRules(
       return h && DUST.includes(h);
     }).length;
     const lordInDust = lordHouse && DUST.includes(lordHouse);
-    const score = afflicted + (lordInDust ? 1 : 0);
-    if (score >= 2) {
+    if (afflicted + (lordInDust ? 1 : 0) >= 2) {
       out.push({ side: 'b', weight: 1.8,
         text: `${afflicted} malefics sit in the 6th, 8th or 12th${lordInDust ? ', and the sixth lord is among them' : ''} — 14.1 asks for two or three of these to agree before disease is named, and they do`,
         ground: 'Phaladīpikā 14.1' });
