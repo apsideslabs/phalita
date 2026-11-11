@@ -1,7 +1,7 @@
-/* PHALITA — the ask page. One field, then answers. */
+/* PHALITA — the domain page. A list of domains, then one domain's questions. */
 
 .ask {
-  padding: 2.5rem 0 1.5rem;
+  padding: 2.5rem 0 1.2rem;
   background-color: var(--paper);
   background-image:
     radial-gradient(circle at 12% 18%, rgba(242,107,29,0.09) 0 1.5px, transparent 1.5px),
@@ -15,60 +15,103 @@
 }
 .ask .lede { margin: 0.9rem 0 0; font-size: 1rem; color: #6a6a6a; line-height: 1.7; }
 
-.askbox { margin-top: 1.4rem; }
-.askbox input {
-  width: 100%; padding: 1rem 1.1rem;
-  font-family: var(--sans); font-size: 1.05rem; font-weight: 500;
-  border: 1.5px solid #ddd0bc; border-radius: 14px;
-  background: #fff; color: var(--ink);
-  box-shadow: 0 2px 6px rgba(60,40,20,0.05);
-}
-.askbox input:focus {
-  outline: none; border-color: var(--maroon);
-  box-shadow: 0 0 0 3px rgba(242,107,29,0.12);
+/* ---- the domain grid ---- */
+
+.dhead {
+  margin: 2rem 0 0; font-size: 0.62rem; font-weight: 800;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint);
 }
 
-.sugg { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.9rem; }
-.sugg button {
-  padding: 0.45rem 0.85rem; border-radius: 999px; cursor: pointer;
-  background: #fff; border: 1.5px solid var(--rule);
-  font-family: var(--sans); font-size: 0.78rem; font-weight: 700;
-  color: #4a4a4a;
+.dgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-top: 0.9rem; }
+
+.dtile {
+  display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 0.75rem;
+  align-items: start; text-align: left; cursor: pointer;
+  padding: 1rem 1.05rem; border-radius: 14px;
+  background: #fff; border: 1px solid #f0e6d8;
+  box-shadow: 0 1px 2px rgba(60,40,20,0.04), 0 10px 22px -18px rgba(60,40,20,0.32);
+  font-family: var(--sans);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.sugg button:hover { border-color: var(--maroon); color: var(--maroon-deep); }
+.dtile:hover {
+  transform: translateY(-1px); border-color: #e6cfae;
+  box-shadow: 0 2px 6px rgba(60,40,20,0.06), 0 16px 30px -20px rgba(60,40,20,0.38);
+}
+.dtile .dnum {
+  grid-row: 1 / 3; align-self: center;
+  display: flex; align-items: center; justify-content: center;
+  width: 2.1rem; height: 2.1rem; border-radius: 999px;
+  background: #f8edda; color: var(--maroon-deep);
+  font-family: var(--mono); font-size: 0.72rem; font-weight: 700;
+}
+.dtile .dname {
+  font-size: 0.9rem; font-weight: 700; line-height: 1.3;
+  letter-spacing: -0.015em; color: #141414;
+}
+.dtile .dcount {
+  font-size: 0.66rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #a8a8a8;
+}
+
+/* ---- one domain ---- */
+
+.dback {
+  margin-top: 1.6rem; padding: 0.45rem 0.85rem; cursor: pointer;
+  background: transparent; border: 1.5px solid var(--rule); border-radius: 999px;
+  font-family: var(--sans); font-size: 0.76rem; font-weight: 700; color: #4a4a4a;
+}
+.dback:hover { border-color: var(--maroon); color: var(--maroon-deep); }
+
+.dtitle {
+  margin: 1rem 0 0; font-family: var(--sans); font-weight: 800;
+  font-size: clamp(1.35rem, 4.4vw, 1.7rem); letter-spacing: -0.03em; line-height: 1.15; color: #141414;
+}
+.dsub {
+  margin: 0.35rem 0 0; font-family: var(--serif); font-style: italic;
+  font-size: 0.88rem; color: #9a9a9a;
+}
+
+.dlist { margin-top: 1.2rem; }
+details.dq {
+  background: #fff; border: 1px solid transparent; border-radius: 14px;
+  margin-bottom: 0.55rem;
+  box-shadow: 0 1px 2px rgba(60,40,20,0.04), 0 8px 20px -18px rgba(60,40,20,0.3);
+}
+details.dq summary {
+  cursor: pointer; list-style: none; padding: 0.95rem 1.05rem;
+  font-size: 0.9rem; font-weight: 700; line-height: 1.4; color: #2a2a2a;
+  display: flex; justify-content: space-between; gap: 0.8rem;
+}
+details.dq summary::-webkit-details-marker { display: none; }
+details.dq summary::after {
+  content: '+'; flex-shrink: 0; color: var(--maroon);
+  font-weight: 800; font-size: 1.05rem; line-height: 1;
+}
+details.dq[open] summary::after { content: '\2013'; }
+details.dq[open] summary { border-bottom: 1px solid var(--rule); }
+
+.danswer {
+  margin: 0; padding: 0.95rem 1.05rem 0.2rem;
+  font-size: 0.92rem; line-height: 1.75; color: #4a4a4a;
+}
+.qf { list-style: none; margin: 0.7rem 0 0; padding: 0 1.05rem 1rem; }
+.qf li {
+  position: relative; padding-left: 1.1rem; margin-bottom: 0.3rem;
+  font-size: 0.8rem; line-height: 1.5; color: #8a8a8a;
+}
+.qf li::before {
+  content: ''; position: absolute; left: 0; top: 0.4rem;
+  width: 0.38rem; height: 0.38rem; border-radius: 999px;
+}
+.qf li.pos::before { background: #6fae86; }
+.qf li.neg::before { background: #d08a7c; }
 
 .hintline {
   margin: 1.6rem 0 0; font-family: var(--serif); font-style: italic;
   font-size: 0.95rem; color: #9a9a9a;
 }
 
-.acard-q {
-  margin-top: 1rem; padding: 1.15rem 1.2rem;
-  background: #fff; border: 1px solid transparent; border-radius: 16px;
-  box-shadow: 0 1px 2px rgba(60,40,20,0.04), 0 10px 24px -18px rgba(60,40,20,0.35);
-}
-.acard-q .qk {
-  margin: 0; font-size: 0.6rem; font-weight: 800;
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--maroon-deep);
-}
-.acard-q .qq {
-  margin: 0.4rem 0 0; font-family: var(--sans); font-size: 0.95rem;
-  font-weight: 800; letter-spacing: -0.02em; line-height: 1.35; color: #141414;
-}
-.acard-q .qa { margin: 0.6rem 0 0; font-size: 0.93rem; line-height: 1.7; color: #4a4a4a; }
-.acard-q .qf { list-style: none; margin: 0.8rem 0 0; padding: 0; }
-.acard-q .qf li {
-  position: relative; padding-left: 1.1rem; margin-bottom: 0.3rem;
-  font-size: 0.8rem; line-height: 1.5; color: #8a8a8a;
-}
-.acard-q .qf li::before {
-  content: ''; position: absolute; left: 0; top: 0.4rem;
-  width: 0.38rem; height: 0.38rem; border-radius: 999px;
-}
-.acard-q .qf li.pos::before { background: #6fae86; }
-.acard-q .qf li.neg::before { background: #d08a7c; }
-
-@media (max-width: 620px) {
-  .ask { padding: 2rem 0 1.2rem; }
-  .acard-q { padding: 1rem; }
+@media (max-width: 560px) {
+  .ask { padding: 2rem 0 1rem; }
+  .dgrid { grid-template-columns: 1fr; }
 }
