@@ -73,23 +73,25 @@
       '</div></section>';
   }
 
+  /** One chapter, as a collapsible card. */
   function chapter(c) {
     var gives = (c.gives || []).map(function (g) { return '<li>' + esc(g) + '</li>'; }).join('');
     var costs = (c.costs || []).map(function (g) { return '<li>' + esc(g) + '</li>'; }).join('');
 
-    return '<article class="ch ' + c.standing + '">' +
-      '<div class="ch-head">' +
+    return '<details class="ch ' + c.standing + '"' + (c.open ? ' open' : '') + '>' +
+      '<summary class="ch-head">' +
         '<span class="disc"><span class="emoji">' + esc(c.emoji) + '</span></span>' +
         '<div class="ch-title"><h2>' + esc(c.title) + '</h2>' +
           '<p class="strap">' + esc(c.strap) + '</p></div>' +
         '<span class="tag ' + c.standing + '">' + (TAG[c.standing] || '') + '</span>' +
-      '</div>' +
+      '</summary>' +
+      '<div class="ch-body">' +
       '<p class="ch-lead">' + esc(c.lead) + '</p>' +
       (gives ? '<div class="grp good"><span class="glabel">What it gives</span><ul>' + gives + '</ul></div>' : '') +
       (costs ? '<div class="grp bad"><span class="glabel">What it costs</span><ul>' + costs + '</ul></div>' : '') +
       (c.when ? '<div class="when"><span class="ric">⏳</span><div><span class="rlabel">Most active</span><b>' + esc(c.when) + '</b></div></div>' : '') +
       '<p class="ch-advice">' + esc(c.advice) + '</p>' +
-      '</article>';
+      '</div></details>';
   }
 
   function verse(s) {
@@ -164,7 +166,10 @@
     html += shifts(chart);
 
     html += '<div class="narrow chapters">' +
-      P.buildNarrative(chart).map(chapter).join('') +
+      P.buildNarrative(chart).map(function (c, i) {
+        c.open = i === 0;
+        return chapter(c);
+      }).join('') +
       '</div>';
 
     html += '<div class="narrow verses-wrap" id="verses"><p class="kicker">From the verses</p>' +
