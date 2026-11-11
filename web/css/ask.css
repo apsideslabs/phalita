@@ -1,0 +1,74 @@
+/* PHALITA — the ask page. One field, then answers. */
+
+.ask {
+  padding: 2.5rem 0 1.5rem;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(242,107,29,0.09) 0 1.5px, transparent 1.5px),
+    radial-gradient(circle at 68% 54%, rgba(224,162,28,0.10) 0 1.5px, transparent 1.5px);
+  background-size: 54px 54px, 76px 76px;
+  border-bottom: 1px solid var(--rule);
+}
+.ask h1 {
+  font-family: var(--sans); font-weight: 800; letter-spacing: -0.04em;
+  font-size: clamp(1.9rem, 6vw, 2.6rem); margin: 0.6rem 0 0; line-height: 1.08; color: #141414;
+}
+.ask .lede { margin: 0.9rem 0 0; font-size: 1rem; color: #6a6a6a; line-height: 1.7; }
+
+.askbox { margin-top: 1.4rem; }
+.askbox input {
+  width: 100%; padding: 1rem 1.1rem;
+  font-family: var(--sans); font-size: 1.05rem; font-weight: 500;
+  border: 1.5px solid #ddd0bc; border-radius: 14px;
+  background: #fff; color: var(--ink);
+  box-shadow: 0 2px 6px rgba(60,40,20,0.05);
+}
+.askbox input:focus {
+  outline: none; border-color: var(--maroon);
+  box-shadow: 0 0 0 3px rgba(242,107,29,0.12);
+}
+
+.sugg { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.9rem; }
+.sugg button {
+  padding: 0.45rem 0.85rem; border-radius: 999px; cursor: pointer;
+  background: #fff; border: 1.5px solid var(--rule);
+  font-family: var(--sans); font-size: 0.78rem; font-weight: 700;
+  color: #4a4a4a;
+}
+.sugg button:hover { border-color: var(--maroon); color: var(--maroon-deep); }
+
+.hintline {
+  margin: 1.6rem 0 0; font-family: var(--serif); font-style: italic;
+  font-size: 0.95rem; color: #9a9a9a;
+}
+
+.acard-q {
+  margin-top: 1rem; padding: 1.15rem 1.2rem;
+  background: #fff; border: 1px solid transparent; border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(60,40,20,0.04), 0 10px 24px -18px rgba(60,40,20,0.35);
+}
+.acard-q .qk {
+  margin: 0; font-size: 0.6rem; font-weight: 800;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--maroon-deep);
+}
+.acard-q .qq {
+  margin: 0.4rem 0 0; font-family: var(--sans); font-size: 0.95rem;
+  font-weight: 800; letter-spacing: -0.02em; line-height: 1.35; color: #141414;
+}
+.acard-q .qa { margin: 0.6rem 0 0; font-size: 0.93rem; line-height: 1.7; color: #4a4a4a; }
+.acard-q .qf { list-style: none; margin: 0.8rem 0 0; padding: 0; }
+.acard-q .qf li {
+  position: relative; padding-left: 1.1rem; margin-bottom: 0.3rem;
+  font-size: 0.8rem; line-height: 1.5; color: #8a8a8a;
+}
+.acard-q .qf li::before {
+  content: ''; position: absolute; left: 0; top: 0.4rem;
+  width: 0.38rem; height: 0.38rem; border-radius: 999px;
+}
+.acard-q .qf li.pos::before { background: #6fae86; }
+.acard-q .qf li.neg::before { background: #d08a7c; }
+
+@media (max-width: 620px) {
+  .ask { padding: 2rem 0 1.2rem; }
+  .acard-q { padding: 1rem; }
+}
