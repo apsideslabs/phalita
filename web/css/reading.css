@@ -1,0 +1,124 @@
+/* PHALITA — the reading page. Kept out of style.css so the homepage stylesheet
+   stays the size it is. */
+
+/* ---- head + form ---- */
+
+.rd-head {
+  padding: 3.5rem 0 3rem;
+  background:
+    radial-gradient(50rem 24rem at 80% -20%, rgba(176, 132, 40, 0.12), transparent 62%),
+    var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+.rd-head h1 {
+  font-family: var(--serif); font-weight: 600; letter-spacing: -0.025em;
+  font-size: clamp(1.9rem, 3.4vw, 2.6rem); margin: 0.6rem 0 0; line-height: 1.15;
+}
+.rd-head .lede { margin: 0.9rem 0 0; font-size: 1rem; color: var(--ink-soft); line-height: 1.75; }
+
+.bform {
+  margin-top: 1.8rem; padding: 1.4rem;
+  background: var(--card); border: 1px solid var(--rule);
+  border-radius: 12px; box-shadow: var(--shadow);
+}
+.bform .row { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+.bform .row:last-child { margin-bottom: 0; }
+.bform label { flex: 1 1 9rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.bform span {
+  font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+.bform input {
+  font-family: var(--mono); font-size: 0.85rem; padding: 0.55rem 0.65rem;
+  border: 1px solid var(--rule); border-radius: 8px;
+  background: var(--paper); color: var(--ink); width: 100%;
+}
+.bform input:focus { outline: none; border-color: var(--maroon); background: #fff; }
+.bform .actions { align-items: center; }
+.bform button {
+  padding: 0.75rem 1.6rem; border: 0; border-radius: 999px;
+  background: var(--maroon); color: #fff; cursor: pointer;
+  font-size: 0.88rem; font-weight: 600; font-family: var(--sans);
+}
+.bform button:hover { background: var(--maroon-deep); }
+.bform .hint { flex: 2 1 16rem; font-size: 0.78rem; color: var(--ink-faint); line-height: 1.6; }
+
+/* ---- output ---- */
+
+.rd-out { padding-bottom: 4rem; }
+
+.rd-mast { padding: 3rem 0 0; }
+.rd-mast h1 {
+  font-family: var(--serif); font-weight: 600; letter-spacing: -0.025em;
+  font-size: clamp(1.7rem, 3vw, 2.3rem); margin: 0.5rem 0 0; line-height: 1.15;
+}
+.rd-mast .sub { margin: 0.4rem 0 0; font-size: 0.85rem; color: var(--ink-faint); }
+.rd-mast .dasha {
+  margin: 1.3rem 0 0; padding-left: 0.9rem; border-left: 2px solid var(--rule);
+  font-size: 0.95rem; line-height: 1.8; color: var(--ink-soft);
+}
+
+.chapter { margin-top: 3.25rem; }
+.chapter h2 {
+  font-family: var(--serif); font-size: 1.3rem; font-weight: 600;
+  letter-spacing: -0.01em; margin: 0; line-height: 1.3;
+}
+.chapter .strap {
+  margin: 0.3rem 0 0; font-family: var(--mono); font-size: 0.64rem;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint);
+}
+.chapter .body { margin-top: 1rem; padding-left: 1.1rem; border-left: 2px solid var(--rule); }
+.chapter.strong .body { border-left-color: #cddfd2; }
+.chapter.strained .body { border-left-color: #e8d3cc; }
+.chapter p { margin: 0 0 0.95rem; font-size: 1rem; line-height: 1.85; }
+.chapter p:last-child { margin-bottom: 0; }
+.chapter p:first-child { font-size: 1.06em; line-height: 1.75; }
+
+/* ---- verses ---- */
+
+.verses-wrap { margin-top: 4rem; padding-top: 2.2rem; border-top: 1px solid var(--rule); }
+.verses { margin-top: 2.5rem; }
+.verses h2 { font-family: var(--serif); font-size: 1.1rem; font-weight: 600; margin: 0 0 0.8rem; }
+.statement { padding: 0.8rem 0; border-bottom: 1px solid var(--rule); }
+.statement:last-child { border-bottom: 0; }
+.statement p { margin: 0; font-size: 0.94rem; line-height: 1.8; color: var(--ink-soft); }
+
+.verse { margin-top: 0.4rem; }
+.verse summary {
+  cursor: pointer; font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint);
+}
+.verse summary:hover { color: var(--maroon); }
+.verse .mula { margin: 0.6rem 0 0; font-size: 0.92rem; line-height: 2; color: var(--ink-soft); }
+.verse .ref { margin: 0.25rem 0 0; font-family: var(--mono); font-size: 0.62rem; color: var(--ink-faint); }
+
+/* ---- catalogue ---- */
+
+details.cat { margin-top: 3.5rem; padding-top: 1.8rem; border-top: 1px solid var(--rule); }
+details.cat summary {
+  cursor: pointer; font-family: var(--mono); font-size: 0.68rem;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft);
+}
+details.cat summary:hover { color: var(--maroon); }
+.qfilter {
+  width: 100%; margin-top: 1rem; padding: 0.6rem 0.8rem;
+  font-family: var(--mono); font-size: 0.78rem;
+  border: 1px solid var(--rule); border-radius: 8px; background: var(--card); color: var(--ink);
+}
+.qfilter:focus { outline: none; border-color: var(--maroon); }
+.qgroup { margin-top: 1.8rem; }
+.qdomain {
+  margin: 0 0 0.3rem; font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint);
+}
+details.q { border-bottom: 1px solid var(--rule); }
+details.q summary { cursor: pointer; padding: 0.5rem 0; font-size: 0.9rem; color: var(--ink-soft); }
+details.q summary:hover { color: var(--ink); }
+details.q p { margin: 0 0 0.8rem; font-size: 0.9rem; line-height: 1.75; color: var(--ink-soft); }
+
+.quiet { color: var(--ink-soft); font-style: italic; }
+
+@media (max-width: 620px) {
+  .bform { padding: 1.1rem; }
+  .bform label { flex: 1 1 100%; }
+}

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Read your chart — Phalita</title>
+<meta name="description" content="A reading of your birth chart, chapter by chapter, from Phaladīpikā." />
+<link rel="stylesheet" href="./css/style.css" />
+<link rel="stylesheet" href="./css/reading.css" />
+</head>
+<body>
+
+<header class="nav">
+  <div class="inner">
+    <a class="brand" href="./index.html"><span class="deva">फल</span> Phalita<span class="dot">.</span></a>
+    <nav class="links">
+      <a href="./about.html">About</a>
+      <a href="./sources.html">Sources</a>
+      <a class="cta" href="./reading.html">Read your chart</a>
+    </nav>
+  </div>
+</header>
+
+<section class="rd-head">
+  <div class="narrow">
+    <p class="kicker">फल · the reading</p>
+    <h1>Read your chart</h1>
+    <p class="lede">Enter the birth date, time and place. The chart is computed in your browser and never leaves it.</p>
+
+    <form id="birth" class="bform">
+      <div class="row">
+        <label><span>Date of birth</span><input type="date" name="date" value="1990-08-15" required /></label>
+        <label><span>Time of birth</span><input type="time" name="time" value="06:45" required /></label>
+      </div>
+      <div class="row">
+        <label><span>Latitude</span><input type="number" name="lat" step="0.0001" value="26.1844" required /></label>
+        <label><span>Longitude</span><input type="number" name="lon" step="0.0001" value="91.7458" required /></label>
+        <label><span>UTC offset</span><input type="number" name="tz" step="0.25" value="5.5" required /></label>
+      </div>
+      <div class="row actions">
+        <button type="submit">Read the chart</button>
+        <span class="hint">Not sure of the exact time? Use the birth certificate time; an hour of error shifts the lagna, not the planets.</span>
+      </div>
+    </form>
+  </div>
+</section>
+
+<main id="out" class="rd-out" aria-live="polite"></main>
+
+<footer class="foot">
+  <div class="inner">
+    <div>
+      <div class="brand"><span class="deva">फल</span> Phalita</div>
+      <p>A reading engine built on Phaladīpikā. No death date is produced, and no grave reading from a single condition.</p>
+    </div>
+    <div class="cols">
+      <div><h4>Reading</h4><a href="./index.html#chapters">The ten chapters</a></div>
+      <div><h4>About</h4><a href="./about.html">What this is</a><a href="./sources.html">Sources</a></div>
+    </div>
+  </div>
+</footer>
+
+<script src="./js/engine.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>

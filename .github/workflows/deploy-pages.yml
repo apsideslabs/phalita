@@ -52,27 +52,32 @@ jobs:
             echo 'no ephemeris check present; skipping'
           fi
 
-      # ---- the site ----------------------------------------------------
-      - name: Install site dependencies
-        working-directory: site
-        run: npm install --no-audit --no-fund
+      # ---- the bundle ---------------------------------------------------
+      - name: Install esbuild
+        run: npm install --no-save --no-audit --no-fund esbuild
 
-      - name: Build the site
-        working-directory: site
-        run: npm run build
+      - name: Bundle the engine for the browser
+        run: |
+          npx esbuild web/src/entry.ts \
+            --bundle \
+            --format=iife \
+            --minify \
+            --target=es2019 \
+            --tsconfig=tsconfig.json \
+            --outfile=web/js/engine.js
+          ls -lh web/js/engine.js
 
       - name: Disable Jekyll
-        run: touch site/dist/.nojekyll
+        run: touch web/.nojekyll
 
       - name: Report output
-        working-directory: site
         run: |
-          find dist -type f | head -30
-          echo "total: $(du -sh dist | cut -f1)"
+          find web -maxdepth 2 -type f | sort | head -30
+          echo "total: $(du -sh web | cut -f1)"
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site/dist
+          path: web
 
   deploy:
     needs: build
