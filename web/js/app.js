@@ -1,9 +1,9 @@
 /**
  * PHALITA — the reading page. Vanilla JS, no dependencies.
  *
- * Reads the form, calls the bundled engine on window.Phalita, and renders the
- * reading as HTML strings. Each renderer is a small function; nothing here
- * knows about a framework.
+ * Reads the form (or the query string the landing page hands over), calls the
+ * bundled engine on window.Phalita, and renders the reading as HTML strings.
+ * Each renderer is a small function; nothing here knows about a framework.
  */
 (function () {
   'use strict';
@@ -79,6 +79,20 @@
     });
   }
 
+  /** Fields the landing page may hand over as query parameters. */
+  var FIELDS = ['date', 'time', 'lat', 'lon', 'tz'];
+
+  function prefill(form) {
+    var q = new URLSearchParams(window.location.search);
+    var touched = false;
+    FIELDS.forEach(function (name) {
+      var v = q.get(name);
+      var el = form.elements.namedItem(name);
+      if (v && el) { el.value = v; touched = true; }
+    });
+    return touched;
+  }
+
   function readForm(form) {
     var f = new FormData(form);
     var dparts = String(f.get('date')).split('-').map(Number);
@@ -122,7 +136,6 @@
 
     out.innerHTML = html;
     wireFilter(out);
-    window.scrollTo({ top: out.offsetTop - 20, behavior: 'smooth' });
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -143,7 +156,14 @@
       }
     };
 
+    var fromHome = prefill(form);
     form.addEventListener('submit', function (ev) { ev.preventDefault(); run(); });
     run();
+
+    // Arriving from the landing page, drop the reader at the reading itself.
+    if (fromHome) {
+      var target = out.getBoundingClientRect().top + window.scrollY - 20;
+      window.scrollTo({ top: target, behavior: 'smooth' });
+    }
   });
 })();
