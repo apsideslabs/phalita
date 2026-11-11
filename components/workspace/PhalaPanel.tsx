@@ -4,11 +4,16 @@
  * PHALITA — the reading.
  *
  * The chart never appears here. Birth data goes in, and what comes out is the
- * astrologer's answer: svabhāva, vivāha, āyurdāya and the present, each line
- * carrying the verse that produced it.
+ * astrologer's answer, in three layers:
  *
- * Each section opens with a resolved verdict — what to follow, what was
- * outweighed, and what was cancelled — before the evidence it rests on.
+ *   1. The questions people ask — the two detailed readings and the hand-built
+ *      questions, each answered in a sentence.
+ *   2. The period — which daśā is running and what Phaladīpikā 19 gives it.
+ *   3. The full catalogue — 250 questions across 25 domains, grouped and
+ *      searchable, each answered from the bhāvas it names.
+ *
+ * A grave reading is never pronounced from one condition; where corroboration
+ * is missing the engine says so.
  */
 
 import React, { useMemo, useState } from 'react';
@@ -18,24 +23,16 @@ import { RASHIS } from '@/lib/jyotisha/constants';
 import { buildReading, SOURCES, ALL_VERSES } from '@/lib/phalita/phala';
 import type { PhalaStatement, ReadingSection } from '@/lib/phalita/phala';
 import { buildVerdicts } from '@/lib/phalita/phala/resolve';
-import { buildDashaPhala } from '@/lib/phalita/phala/dasha';
-import { buildSynthesis } from '@/lib/phalita/phala/synthesis';
-import type { Synthesis } from '@/lib/phalita/phala/synthesis';
 import type { Verdict } from '@/lib/phalita/phala/resolve';
+import { buildDashaPhala } from '@/lib/phalita/phala/dasha';
+import { careerMode, marriageMode } from '@/lib/phalita/phala/synthesis';
+import type { Synthesis } from '@/lib/phalita/phala/synthesis';
+import { buildQuestions } from '@/lib/phalita/phala/questions';
+import { buildQuestions2 } from '@/lib/phalita/phala/questions2';
+import { buildCatalogue } from '@/lib/phalita/phala/catalogue-engine';
 import {
-  BookOpen,
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  AlertTriangle,
-  CheckCircle2,
-  MinusCircle,
-  Info,
-  Moon,
-  Fingerprint,
-  Heart,
-  Hourglass,
-  Orbit,
+  BookOpen, Calendar, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2,
+  MinusCircle, Info, Moon, Fingerprint, Heart, Hourglass, Orbit, Search, ShieldQuestion,
 } from 'lucide-react';
 
 interface PhalaPanelProps {
@@ -50,10 +47,7 @@ const TONE_STYLE: Record<string, string> = {
 };
 const TONE_LABEL: Record<string, string> = { shubha: 'Śubha', ashubha: 'Aśubha', mishra: 'Miśra' };
 const SECTION_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
-  svabhava: Fingerprint,
-  vivaha: Heart,
-  ayus: Hourglass,
-  gochara: Orbit,
+  svabhava: Fingerprint, vivaha: Heart, ayus: Hourglass, gochara: Orbit,
 };
 
 function MulaBlock({ statement }: { statement: PhalaStatement }) {
@@ -91,28 +85,19 @@ function StatementCard({ s, showGraha }: { s: PhalaStatement; showGraha?: boolea
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           {showGraha && s.graha && (
-            <div className="text-[10px] font-mono text-slate-500">
-              {s.bhava}th from the Moon
-            </div>
+            <div className="text-[10px] font-mono text-slate-500">{s.bhava}th from the Moon</div>
           )}
           {s.keywords.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-0.5">
               {s.keywords.slice(0, 6).map((k) => (
-                <span
-                  key={k}
-                  className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-serif"
-                >
+                <span key={k} className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-serif">
                   {k}
                 </span>
               ))}
             </div>
           )}
         </div>
-        <span
-          className={`px-1.5 py-0.5 rounded border text-[9px] font-mono uppercase tracking-wider shrink-0 ${
-            TONE_STYLE[s.tone]
-          }`}
-        >
+        <span className={`px-1.5 py-0.5 rounded border text-[9px] font-mono uppercase tracking-wider shrink-0 ${TONE_STYLE[s.tone]}`}>
           {TONE_LABEL[s.tone]}
         </span>
       </div>
@@ -180,20 +165,14 @@ function VerdictCard({ v }: { v: Verdict }) {
         <p className="mt-2 text-[12.5px] text-slate-800 leading-relaxed">
           <span className="font-semibold">Follow: </span>
           {v.winner.phala}
-          <span className="text-slate-500">
-            {' '}
-            ({v.winner.short}, weight {v.winner.weight})
-          </span>
+          <span className="text-slate-500"> ({v.winner.short}, weight {v.winner.weight})</span>
         </p>
       )}
 
       {v.cancelled.length > 0 && (
         <ul className="mt-2 space-y-1">
           {v.cancelled.map((c, i) => (
-            <li
-              key={i}
-              className="text-[11px] text-rose-800 bg-rose-50 border border-rose-200 rounded px-2 py-1 leading-snug"
-            >
+            <li key={i} className="text-[11px] text-rose-800 bg-rose-50 border border-rose-200 rounded px-2 py-1 leading-snug">
               <span className="line-through decoration-rose-400">{c.claim.short}</span> withdrawn —{' '}
               {c.by.short} cancels it.
             </li>
@@ -214,9 +193,7 @@ function VerdictCard({ v }: { v: Verdict }) {
       {v.reasoning.length > 0 && (
         <ul className="mt-2 pt-2 border-t border-slate-200 space-y-1">
           {v.reasoning.map((r, i) => (
-            <li key={i} className="text-[11px] text-slate-600 leading-snug">
-              · {r}
-            </li>
+            <li key={i} className="text-[11px] text-slate-600 leading-snug">· {r}</li>
           ))}
         </ul>
       )}
@@ -231,25 +208,17 @@ function SynthesisCard({ s }: { s: Synthesis }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 p-4">
       <div className="flex items-center gap-2">
-        <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C2D19]">
-          {s.question}
-        </span>
-        <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-mono uppercase">
-          synthesis
-        </span>
+        <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C2D19]">{s.question}</span>
+        <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-mono uppercase">synthesis</span>
       </div>
       <p className="mt-1.5 font-serif text-[15px] leading-relaxed text-slate-900">{s.answer}</p>
 
       <div className="mt-3 flex items-center gap-2 text-[10px] font-mono text-slate-500">
-        <span>
-          {s.a} {s.aScore.toFixed(1)}
-        </span>
+        <span>{s.a} {s.aScore.toFixed(1)}</span>
         <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
           <div className="h-full bg-[#8C2D19]/70" style={{ width: `${aPct}%` }} />
         </div>
-        <span>
-          {s.bScore.toFixed(1)} {s.b}
-        </span>
+        <span>{s.bScore.toFixed(1)} {s.b}</span>
       </div>
 
       <button
@@ -265,16 +234,10 @@ function SynthesisCard({ s }: { s: Synthesis }) {
         <div className="mt-2 space-y-1">
           {s.factors.map((f, i) => (
             <div key={i} className="flex items-start gap-2 text-[11px] leading-snug">
-              <span
-                className={`mt-1 w-1.5 h-1.5 rounded-full shrink-0 ${
-                  f.side === 'a' ? 'bg-[#8C2D19]' : 'bg-slate-400'
-                }`}
-              />
+              <span className={`mt-1 w-1.5 h-1.5 rounded-full shrink-0 ${f.side === 'a' ? 'bg-[#8C2D19]' : 'bg-slate-400'}`} />
               <span className="text-slate-700">
                 {f.label}{' '}
-                <span className="text-slate-400">
-                  ({f.side === 'a' ? s.a : s.b}, +{f.weight})
-                </span>
+                <span className="text-slate-400">({f.side === 'a' ? s.a : s.b}, +{f.weight})</span>
                 <span className="block text-[10px] text-slate-500">{f.ground}</span>
               </span>
             </div>
@@ -306,9 +269,7 @@ function DashaCard({ chart, date }: { chart: JyotishaChart; date: Date }) {
 
       <div className="bg-white rounded-2xl border border-slate-200/90 p-4">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
-            Mahādaśā
-          </span>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Mahādaśā</span>
           <span className="font-serif font-bold text-slate-900">{d.mahadasha.name}</span>
           <span className="text-[11px] font-mono text-slate-500">
             {d.mahadasha.start} → {d.mahadasha.end}
@@ -316,9 +277,7 @@ function DashaCard({ chart, date }: { chart: JyotishaChart; date: Date }) {
         </div>
         {d.antardasha && (
           <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
-              Antardaśā
-            </span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Antardaśā</span>
             <span className="text-[13px] text-slate-800">{d.antardasha.name}</span>
             <span className="text-[11px] font-mono text-slate-500">
               {d.antardasha.start} → {d.antardasha.end}
@@ -353,9 +312,7 @@ function Section({ section, chart }: { section: ReadingSection; chart: JyotishaC
         </span>
         <div>
           <h3 className="font-serif font-bold text-base text-slate-900">{section.title}</h3>
-          <p className="text-[11px] text-slate-600 leading-relaxed max-w-3xl mt-0.5">
-            {section.intro}
-          </p>
+          <p className="text-[11px] text-slate-600 leading-relaxed max-w-3xl mt-0.5">{section.intro}</p>
         </div>
       </div>
 
@@ -392,21 +349,13 @@ function Section({ section, chart }: { section: ReadingSection; chart: JyotishaC
             <span className="text-[11px] font-mono uppercase tracking-wider text-slate-600">
               Rules tested in this chart ({section.tested.length})
             </span>
-            {showTested ? (
-              <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
-            ) : (
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            )}
+            {showTested ? <ChevronUp className="w-3.5 h-3.5 text-slate-400" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
           </button>
           {showTested && (
             <ul className="px-4 pb-3 space-y-1 border-t border-slate-100 pt-2">
               {section.tested.map((t, i) => (
                 <li key={i} className="flex items-start gap-2 text-[11px]">
-                  <span
-                    className={`mt-1 w-1.5 h-1.5 rounded-full shrink-0 ${
-                      t.fired ? 'bg-emerald-500' : 'bg-slate-300'
-                    }`}
-                  />
+                  <span className={`mt-1 w-1.5 h-1.5 rounded-full shrink-0 ${t.fired ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                   <span className="text-slate-600">
                     <span className="font-mono text-slate-800">{t.rule}</span> — {t.when}
                     {!t.fired && ' — did not hold'}
@@ -421,12 +370,177 @@ function Section({ section, chart }: { section: ReadingSection; chart: JyotishaC
   );
 }
 
+/** One catalogue row: the question, its verdict, and the evidence on demand. */
+function CatalogueRow({ q }: { q: ReturnType<typeof buildCatalogue>[number] }) {
+  const [open, setOpen] = useState(false);
+  const withheld = q.answer.startsWith('Not enough to call');
+  const mixed = q.answer.startsWith('Mixed');
+  const supported = q.aScore > q.bScore && !withheld && !mixed;
+  const badge = withheld
+    ? { t: 'Withheld', c: 'bg-slate-100 text-slate-600 border-slate-300' }
+    : mixed
+    ? { t: 'Mixed', c: 'bg-amber-50 text-amber-900 border-amber-200' }
+    : supported
+    ? { t: 'Supported', c: 'bg-emerald-50 text-emerald-900 border-emerald-200' }
+    : { t: 'Under strain', c: 'bg-rose-50 text-rose-900 border-rose-200' };
+
+  return (
+    <div className="border-b border-slate-100 last:border-0">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-start gap-2 px-3 py-2 text-left hover:bg-slate-50/70"
+      >
+        <span className="text-[12px] text-slate-700 leading-snug flex-1">{q.question}</span>
+        <span className={`px-1.5 py-0.5 rounded border text-[9px] font-mono uppercase tracking-wider shrink-0 ${badge.c}`}>
+          {badge.t}
+        </span>
+      </button>
+      {open && (
+        <div className="px-3 pb-3">
+          <p className="text-[11.5px] text-slate-700 leading-relaxed">{q.answer}</p>
+          <div className="mt-1.5 space-y-0.5">
+            {q.factors.map((f, i) => (
+              <div key={i} className="flex items-start gap-1.5 text-[10.5px] leading-snug">
+                <span className={`mt-1 w-1 h-1 rounded-full shrink-0 ${f.side === 'a' ? 'bg-emerald-500' : 'bg-rose-400'}`} />
+                <span className="text-slate-600">{f.label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-1.5 text-[10px] text-slate-400 italic leading-snug">{q.caveat}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** The 250-question catalogue, grouped by domain and searchable. */
+function Catalogue({ chart }: { chart: JyotishaChart }) {
+  const all = useMemo(() => buildCatalogue(chart), [chart]);
+  const [domain, setDomain] = useState<string>('all');
+  const [q, setQ] = useState('');
+
+  const stats = useMemo(() => {
+    let sup = 0, strain = 0, held = 0, mix = 0;
+    for (const c of all) {
+      if (c.answer.startsWith('Not enough to call')) held++;
+      else if (c.answer.startsWith('Mixed')) mix++;
+      else if (c.aScore > c.bScore) sup++;
+      else strain++;
+    }
+    return { sup, strain, held, mix };
+  }, [all]);
+
+  const domains = useMemo(() => Array.from(new Set(all.map((c) => c.domain))), [all]);
+  const shown = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return all.filter(
+      (c) =>
+        (domain === 'all' || c.domain === domain) &&
+        (!needle || c.question.toLowerCase().includes(needle))
+    );
+  }, [all, domain, q]);
+
+  const grouped = useMemo(() => {
+    const m = new Map<string, typeof shown>();
+    for (const c of shown) {
+      const arr = m.get(c.domain) ?? [];
+      arr.push(c);
+      m.set(c.domain, arr);
+    }
+    return Array.from(m.entries());
+  }, [shown]);
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-start gap-2.5">
+        <span className="w-8 h-8 rounded-lg bg-[#8C2D19]/10 text-[#8C2D19] flex items-center justify-center shrink-0">
+          <ShieldQuestion className="w-4 h-4" />
+        </span>
+        <div>
+          <h3 className="font-serif font-bold text-base text-slate-900">The full catalogue</h3>
+          <p className="text-[11px] text-slate-600 leading-relaxed max-w-3xl mt-0.5">
+            {all.length} questions across {domains.length} domains, each read from the bhāvas it
+            names. A grave question is withheld unless two placements agree — Phaladīpikā 15.6.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {[
+          { l: 'Supported', v: stats.sup, c: 'text-emerald-700' },
+          { l: 'Under strain', v: stats.strain, c: 'text-rose-700' },
+          { l: 'Mixed', v: stats.mix, c: 'text-amber-700' },
+          { l: 'Withheld', v: stats.held, c: 'text-slate-600' },
+        ].map((s) => (
+          <div key={s.l} className="bg-white border border-slate-200 rounded-xl px-3 py-2">
+            <div className={`text-lg font-serif font-bold ${s.c}`}>{s.v}</div>
+            <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500">{s.l}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+        <div className="p-2 border-b border-slate-100 space-y-2">
+          <label className="flex items-center gap-2 px-2">
+            <Search className="w-3.5 h-3.5 text-slate-400" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search the 250 questions…"
+              className="flex-1 py-1.5 text-[12px] bg-transparent focus:outline-none placeholder:text-slate-400"
+            />
+          </label>
+          <div className="flex gap-1 overflow-x-auto pb-1">
+            <button
+              type="button"
+              onClick={() => setDomain('all')}
+              className={`px-2 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider whitespace-nowrap ${
+                domain === 'all' ? 'bg-[#8C2D19] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              All
+            </button>
+            {domains.map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => setDomain(d)}
+                className={`px-2 py-1 rounded-md text-[10px] whitespace-nowrap ${
+                  domain === d ? 'bg-[#8C2D19] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          {grouped.length === 0 ? (
+            <div className="p-4 text-[12px] text-slate-500">Nothing matches that search.</div>
+          ) : (
+            grouped.map(([d, list]) => (
+              <div key={d}>
+                <div className="px-3 py-1.5 bg-slate-50 border-y border-slate-100 text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                  {d} · {list.length}
+                </div>
+                {list.map((c) => (
+                  <CatalogueRow key={c.id} q={c} />
+                ))}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function PhalaPanel({ chart, ayanamshaType }: PhalaPanelProps) {
   const [dateStr, setDateStr] = useState(() => {
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
-      d.getDate()
-    ).padStart(2, '0')}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
 
   const date = useMemo(() => {
@@ -435,25 +549,23 @@ export function PhalaPanel({ chart, ayanamshaType }: PhalaPanelProps) {
     return new Date(y, m - 1, d, 12, 0, 0);
   }, [dateStr]);
 
-  const reading = useMemo(
-    () => buildReading(chart, date, ayanamshaType),
-    [chart, date, ayanamshaType]
+  const reading = useMemo(() => buildReading(chart, date, ayanamshaType), [chart, date, ayanamshaType]);
+
+  const keyQuestions = useMemo(
+    () => [careerMode(chart), marriageMode(chart), ...buildQuestions(chart), ...buildQuestions2(chart)],
+    [chart]
   );
 
-  const synthesis = useMemo(() => buildSynthesis(chart), [chart]);
   const source = SOURCES[0];
 
   return (
     <div id="phala-panel" className="space-y-6">
-      {/* Header */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-[#8C2D19]" />
-              <h2 className="text-lg font-serif font-bold text-slate-900 tracking-tight">
-                The Reading
-              </h2>
+              <h2 className="text-lg font-serif font-bold text-slate-900 tracking-tight">The Reading</h2>
               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
                 फल
               </span>
@@ -488,9 +600,7 @@ export function PhalaPanel({ chart, ayanamshaType }: PhalaPanelProps) {
             <Fingerprint className="w-4 h-4" />
           </span>
           <div>
-            <h3 className="font-serif font-bold text-base text-slate-900">
-              The questions people ask
-            </h3>
+            <h3 className="font-serif font-bold text-base text-slate-900">The questions people ask</h3>
             <p className="text-[11px] text-slate-600 leading-relaxed max-w-3xl mt-0.5">
               No verse answers these outright. They are read from several placements together and
               stated as a judgement, with the factors that decided it shown underneath.
@@ -498,11 +608,13 @@ export function PhalaPanel({ chart, ayanamshaType }: PhalaPanelProps) {
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {synthesis.map((syn) => (
+          {keyQuestions.map((syn) => (
             <SynthesisCard key={syn.id} s={syn} />
           ))}
         </div>
       </section>
+
+      <DashaCard chart={chart} date={date} />
 
       {reading.sections
         .filter((s) => s.id !== 'gochara')
@@ -510,18 +622,18 @@ export function PhalaPanel({ chart, ayanamshaType }: PhalaPanelProps) {
           <Section key={s.id} section={s} chart={chart} />
         ))}
 
-      <DashaCard chart={chart} date={date} />
-
       {reading.sections
         .filter((s) => s.id === 'gochara')
         .map((s) => (
           <Section key={s.id} section={s} chart={chart} />
         ))}
 
+      <Catalogue chart={chart} />
+
       <div className="px-1 text-[11px] text-slate-500 leading-relaxed">
-        {ALL_VERSES.length} verses held · {source.title} (Mantreśvara, {source.period}) · e-text
-        from {source.etext.provider}, {source.etext.licence}. {source.etext.note} Coverage and
-        pending chapters are in SOURCES.md.
+        {ALL_VERSES.length} verses held · {source.title} (Mantreśvara, {source.period}) · e-text from{' '}
+        {source.etext.provider}, {source.etext.licence}. {source.etext.note} Coverage and pending
+        chapters are in SOURCES.md.
       </div>
     </div>
   );
