@@ -10,6 +10,7 @@
  */
 
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
+import { RASHIS } from '@/lib/jyotisha/constants';
 import type { Finding } from './rules';
 
 const MAL: PlanetId[] = ['sun', 'mars', 'saturn', 'rahu', 'ketu'];
@@ -21,6 +22,11 @@ const OWN: Record<string, number[]> = {
 
 const lordOf = (c: JyotishaChart, h: number) =>
   c.bhavas[h - 1]?.rashiLord as PlanetId | undefined;
+
+const signName = (c: JyotishaChart, h: number): string => {
+  const n = c.bhavas[h - 1]?.rashiNumber;
+  return (n && RASHIS[n - 1]?.sanskritName) || 'that sign';
+};
 
 const bal = (c: JyotishaChart, p: PlanetId | undefined): number => {
   if (!p) return 0;
@@ -119,8 +125,8 @@ export function applyVerseRules(
         side: good ? 'a' : 'b',
         weight: 1.4,
         text: good
-          ? `Counted from the Moon, the seventh falls in ${chart.bhavas[seventhFromMoon - 1]?.rashiName} and its lord ${lordFromMoon} is a benefic — 10.1 reads the Moon's seventh alongside the Lagna's, and this one is kind`
-          : `Counted from the Moon, the seventh falls in ${chart.bhavas[seventhFromMoon - 1]?.rashiName} with ${lordFromMoon} ruling it — 10.1 requires both the Lagna's seventh and the Moon's, and this one is not favourable`,
+          ? `Counted from the Moon, the seventh falls in ${signName(chart, seventhFromMoon)} and its lord ${lordFromMoon} is a benefic — 10.1 reads the Moon's seventh alongside the Lagna's, and this one is kind`
+          : `Counted from the Moon, the seventh falls in ${signName(chart, seventhFromMoon)} with ${lordFromMoon} ruling it — 10.1 requires both the Lagna's seventh and the Moon's, and this one is not favourable`,
         ground: 'Phaladīpikā 10.1',
       });
     }
