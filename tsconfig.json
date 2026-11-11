@@ -18,5 +18,5 @@
     }
   },
   "include": ["**/*.ts"],
-  "exclude": ["node_modules", "web/js"]
+  "exclude": ["node_modules", "web/js", "lib/settings"]
 }
