@@ -146,9 +146,7 @@
 .tag.mixed { background: #fdf3e2; color: #8a6316; }
 .tag.strained { background: #fdeeea; color: #9a3b2c; }
 
-.ch-lead {
-  margin: 0.9rem 0 0; font-size: 0.95rem; line-height: 1.7; color: #4a4a4a;
-}
+.ch-lead { margin: 0.9rem 0 0; font-size: 0.95rem; line-height: 1.7; color: #4a4a4a; }
 
 .grp { margin-top: 0.9rem; }
 .glabel {
@@ -207,29 +205,42 @@
 .verse .mula { margin: 0.6rem 0 0; font-size: 0.92rem; line-height: 2; color: var(--ink-soft); }
 .verse .ref { margin: 0.25rem 0 0; font-size: 0.62rem; color: var(--ink-faint); }
 
-/* ---- catalogue ---- */
+/* ---- the link out to the catalogue ---- */
 
-details.cat { margin-top: 2.8rem; padding-top: 1.6rem; border-top: 1px solid var(--rule); }
-details.cat summary {
-  cursor: pointer; font-size: 0.7rem; font-weight: 700;
-  letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft);
+.more { margin-top: 3rem; }
+.more-note {
+  margin: 0.6rem 0 0; text-align: center;
+  font-size: 0.76rem; color: var(--ink-faint);
 }
-details.cat summary:hover { color: var(--maroon-deep); }
+
+/* ---- catalogue (questions.html) ---- */
+
 .qfilter {
-  width: 100%; margin-top: 1rem; padding: 0.65rem 0.8rem;
-  font-size: 0.85rem; border: 1.5px solid var(--rule); border-radius: 11px;
+  width: 100%; margin: 1.5rem 0 0; padding: 0.75rem 0.9rem;
+  font-size: 0.9rem; border: 1.5px solid var(--rule); border-radius: 11px;
   background: #fff; color: var(--ink);
 }
 .qfilter:focus { outline: none; border-color: var(--maroon); }
-.qgroup { margin-top: 1.7rem; }
+.qgroup { margin-top: 1.9rem; }
 .qdomain {
   margin: 0 0 0.3rem; font-size: 0.62rem; font-weight: 800;
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint);
 }
 details.q { border-bottom: 1px solid var(--rule); }
-details.q summary { cursor: pointer; padding: 0.5rem 0; font-size: 0.9rem; color: var(--ink-soft); }
+details.q summary { cursor: pointer; padding: 0.55rem 0; font-size: 0.91rem; color: var(--ink-soft); }
 details.q summary:hover { color: var(--ink); }
-details.q p { margin: 0 0 0.8rem; font-size: 0.9rem; line-height: 1.7; color: var(--ink-soft); }
+details.q p { margin: 0 0 0.6rem; font-size: 0.9rem; line-height: 1.7; color: var(--ink-soft); }
+.qf { list-style: none; margin: 0 0 0.9rem; padding: 0; }
+.qf li {
+  position: relative; padding-left: 1.1rem; margin-bottom: 0.35rem;
+  font-size: 0.82rem; line-height: 1.55; color: #8a8a8a;
+}
+.qf li::before {
+  content: ''; position: absolute; left: 0; top: 0.42rem;
+  width: 0.4rem; height: 0.4rem; border-radius: 999px;
+}
+.qf li.pos::before { background: #6fae86; }
+.qf li.neg::before { background: #d08a7c; }
 
 .quiet { color: var(--ink-soft); font-style: italic; }
 

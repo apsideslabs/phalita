@@ -1,5 +1,9 @@
 /**
  * PHALITA — the reading page. Vanilla JS, no dependencies.
+ *
+ * The reading is the reading: masthead, period shifts, ten chapter cards, the
+ * verse sections. The 250-question catalogue is not built here — it lives on
+ * questions.html and runs only when someone asks for it.
  */
 (function () {
   'use strict';
@@ -69,7 +73,6 @@
       '</div></section>';
   }
 
-  /** One chapter, as a card. */
   function chapter(c) {
     var gives = (c.gives || []).map(function (g) { return '<li>' + esc(g) + '</li>'; }).join('');
     var costs = (c.costs || []).map(function (g) { return '<li>' + esc(g) + '</li>'; }).join('');
@@ -106,49 +109,6 @@
     return '<section class="verses"><h2>' + esc(sec.title) + '</h2>' + body + '</section>';
   }
 
-  function catalogue(items) {
-    var groups = {};
-    items.forEach(function (q) {
-      (groups[q.domain] = groups[q.domain] || []).push(q);
-    });
-    var blocks = Object.keys(groups).map(function (d) {
-      var rows = groups[d].map(function (q) {
-        return '<details class="q" data-t="' + esc(q.question.toLowerCase()) + '">' +
-          '<summary>' + esc(q.question) + '</summary><p>' + esc(q.answer) + '</p></details>';
-      }).join('');
-      return '<div class="qgroup"><p class="qdomain">' + esc(d) + '</p>' + rows + '</div>';
-    }).join('');
-    return '<details class="cat"><summary>All ' + items.length +
-      ' questions, answered from this chart</summary>' +
-      '<input class="qfilter" type="search" placeholder="Search the questions…" />' +
-      '<div class="qlist">' + blocks + '</div></details>';
-  }
-
-  function wireFilter(root) {
-    var input = root.querySelector('.qfilter');
-    if (!input) return;
-    input.addEventListener('input', function () {
-      var needle = input.value.trim().toLowerCase();
-      Array.prototype.forEach.call(root.querySelectorAll('details.q'), function (el) {
-        var t = el.getAttribute('data-t') || '';
-        el.style.display = !needle || t.indexOf(needle) !== -1 ? '' : 'none';
-      });
-    });
-  }
-
-  var FIELDS = ['date', 'time', 'lat', 'lon', 'tz'];
-
-  function prefill(form) {
-    var q = new URLSearchParams(window.location.search);
-    var touched = false;
-    FIELDS.forEach(function (name) {
-      var v = q.get(name);
-      var el = form.elements.namedItem(name);
-      if (v && el) { el.value = v; touched = true; }
-    });
-    return touched;
-  }
-
   function readForm(form) {
     var f = new FormData(form);
     var dparts = String(f.get('date')).split('-').map(Number);
@@ -164,7 +124,28 @@
     };
   }
 
-  function draw(chart, out) {
+  function query(b) {
+    return 'date=' + encodeURIComponent(
+      String(b.year).padStart(4, '0') + '-' + String(b.month).padStart(2, '0') + '-' + String(b.day).padStart(2, '0')
+    ) + '&time=' + encodeURIComponent(
+      String(b.hour).padStart(2, '0') + ':' + String(b.minute).padStart(2, '0')
+    ) + '&lat=' + b.latitude + '&lon=' + b.longitude + '&tz=' + b.timezoneOffsetHours;
+  }
+
+  var FIELDS = ['date', 'time', 'lat', 'lon', 'tz'];
+
+  function prefill(form) {
+    var q = new URLSearchParams(window.location.search);
+    var touched = false;
+    FIELDS.forEach(function (name) {
+      var v = q.get(name);
+      var el = form.elements.namedItem(name);
+      if (v && el) { el.value = v; touched = true; }
+    });
+    return touched;
+  }
+
+  function draw(chart, birth, out) {
     var P = window.Phalita;
     var now = new Date();
     var d = P.buildDashaPhala(chart, now);
@@ -190,10 +171,12 @@
       reading.sections.filter(function (s) { return s.id !== 'gochara'; }).map(section).join('') +
       '</div>';
 
-    html += '<div class="narrow">' + catalogue(P.buildCatalogue(chart)) + '</div>';
+    html += '<div class="narrow more">' +
+      '<a class="tl-cta" href="./questions.html?' + query(birth) + '">Answer every question about this chart →</a>' +
+      '<p class="more-note">250 questions across 25 domains. Built only if you open it.</p>' +
+      '</div>';
 
     out.innerHTML = html;
-    wireFilter(out);
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -206,9 +189,10 @@
         out.innerHTML = '<div class="narrow"><p class="quiet">The engine has not loaded. Check that js/engine.js was built.</p></div>';
         return;
       }
+      var birth = readForm(form);
       out.innerHTML = '<div class="narrow"><p class="quiet">Reading…</p></div>';
       try {
-        draw(window.Phalita.calculateFullJyotishaChart(readForm(form)), out);
+        draw(window.Phalita.calculateFullJyotishaChart(birth), birth, out);
       } catch (e) {
         out.innerHTML = '<div class="narrow"><p class="quiet">Could not read this chart: ' + esc(e && e.message ? e.message : e) + '</p></div>';
       }
