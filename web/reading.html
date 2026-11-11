@@ -7,6 +7,20 @@
 <meta name="description" content="A reading of your birth chart, chapter by chapter, from Phaladīpikā." />
 <link rel="stylesheet" href="./css/style.css" />
 <link rel="stylesheet" href="./css/reading.css" />
+<style>
+.adv { margin-top: 0.6rem; }
+.adv summary {
+  cursor: pointer; font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; color: #9a9a9a;
+  list-style: none; padding: 0.35rem 0;
+}
+.adv summary::-webkit-details-marker { display: none; }
+.adv summary::after { content: ' ▾'; color: #c4c4c4; }
+.adv[open] summary::after { content: ' ▴'; }
+.adv summary:hover { color: var(--maroon-deep); }
+.advnote { margin: 0.5rem 0 0; font-size: 0.74rem; line-height: 1.55; color: #9a9a9a; }
+.bform label.wide, .vform label.wide { flex: 1 1 100%; }
+</style>
 </head>
 <body>
 
@@ -39,14 +53,24 @@
 
     <form id="birth" class="bform">
       <div class="row">
+        <label class="wide"><span>Place of birth</span>
+          <input type="text" id="place" name="place" list="placelist" placeholder="Start typing a city…" autocomplete="off" value="Guwahati, Assam" />
+          <datalist id="placelist"></datalist>
+        </label>
+      </div>
+      <div class="row">
         <label><span>Date of birth</span><input type="date" name="date" value="1990-08-15" required /></label>
         <label><span>Time of birth</span><input type="time" name="time" value="06:45" required /></label>
       </div>
-      <div class="row">
-        <label><span>Latitude</span><input type="number" name="lat" step="0.0001" value="26.1844" required /></label>
-        <label><span>Longitude</span><input type="number" name="lon" step="0.0001" value="91.7458" required /></label>
-        <label><span>UTC offset</span><input type="number" name="tz" step="0.25" value="5.5" required /></label>
-      </div>
+      <details class="adv">
+        <summary>Coordinates, if the place is not listed</summary>
+        <div class="row">
+          <label><span>Latitude</span><input type="number" name="lat" step="0.0001" value="26.1445" required /></label>
+          <label><span>Longitude</span><input type="number" name="lon" step="0.0001" value="91.7362" required /></label>
+          <label><span>UTC offset</span><input type="number" name="tz" step="0.25" value="5.5" required /></label>
+        </div>
+        <p class="advnote">Offsets are standard time. India has no daylight saving; some countries do, so subtract an hour if the birth fell in a summer-time period.</p>
+      </details>
       <div class="row actions">
         <button type="submit">Read the chart</button>
         <span class="hint">Not sure of the exact time? Use the birth certificate time; an hour of error shifts the lagna, not the planets.</span>
@@ -70,6 +94,7 @@
   </div>
 </footer>
 
+<script src="./js/place.js"></script>
 <script src="./js/engine.js"></script>
 <script src="./js/app.js"></script>
 </body>
