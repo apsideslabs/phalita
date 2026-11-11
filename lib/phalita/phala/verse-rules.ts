@@ -41,6 +41,17 @@ const meanBala = (c: JyotishaChart): number => {
 
 const rel = (other: number, h: number) => ((other - h + 12) % 12) + 1;
 
+const DUST = [6, 8, 12];
+
+/** Every house a planet rules, from the chart's own lordships. */
+const housesRuledBy = (c: JyotishaChart, p: PlanetId): number[] => {
+  const out: number[] = [];
+  for (let h = 1; h <= 12; h++) {
+    if (c.bhavas[h - 1]?.rashiLord === p) out.push(h);
+  }
+  return out;
+};
+
 export function applyVerseRules(
   chart: JyotishaChart,
   bhava: number,
@@ -49,6 +60,7 @@ export function applyVerseRules(
   let out = findings.slice();
   const mean = meanBala(chart);
   const lord = lordOf(chart, bhava);
+  const lordHouse = lord ? (chart.planets[lord]?.house ?? 0) : 0;
 
   // ---- 15.9 — strength modifies the defect -------------------------------
   if (lord && mean > 0) {
@@ -79,6 +91,50 @@ export function applyVerseRules(
     });
   }
 
+  // ---- 15.10 — the Lagna lord promotes the house it occupies -------------
+  // Even where its nature would count against that house.
+  const lagnaLord = lordOf(chart, 1);
+  if (lagnaLord && lordHouse === bhava && lagnaLord !== lord) {
+    out.push({
+      side: 'a',
+      weight: 1.6,
+      text: `The lord of the lagna, ${lagnaLord}, sits in this very house — 15.10 holds that the lagna lord promotes the house it occupies, whatever its natural nature would say`,
+      ground: 'Phaladīpikā 15.10',
+    });
+  }
+
+  // ---- 15.5 — a lord fallen away from its own house ----------------------
+  if (lord && lordHouse && DUSTRUCT(lordHouse, bhava)) {
+    out.push({
+      side: 'b',
+      weight: 1.7,
+      text: `The lord ${lord} stands in the ${ord(rel(lordHouse, bhava))} from its own house — 15.5 treats a lord that has fallen into the 6th, 8th or 12th from its seat as a lord that cannot protect it`,
+      ground: 'Phaladīpikā 15.5',
+    });
+  }
+
+  // ---- 15.29 — a dusthana lord in its other own sign ---------------------
+  if (lord) {
+    const ruled = housesRuledBy(chart, lord);
+    const dustHouse = ruled.find((h) => DUST.includes(h));
+    const goodHouse = ruled.find((h) => h !== dustHouse);
+    const ownSigns = OWN[lord] ?? [];
+    const signNow = chart.bhavas[lordHouse - 1]?.rashiNumber ?? 0;
+
+    if (
+      dustHouse && goodHouse &&
+      ownSigns.includes(signNow) &&
+      lordHouse === goodHouse
+    ) {
+      out.push({
+        side: 'a',
+        weight: 1.5,
+        text: `${lord} rules both the ${ord(dustHouse)} and the ${ord(goodHouse)}, and stands in the ${ord(goodHouse)} in its own sign — 15.29 gives the result of the own-sign house, not of the dusthāna`,
+        ground: 'Phaladīpikā 15.29',
+      });
+    }
+  }
+
   // ---- 12.3 — a malefic in its own sign in the fifth is not a denial ------
   if (bhava === 5) {
     const fifth = chart.bhavas[4];
@@ -101,7 +157,7 @@ export function applyVerseRules(
   // ---- 15.19 — malefics in 6/8/12 from a house increase it through defect -
   const dust = MAL.filter((p) => {
     const h = chart.planets[p]?.house;
-    return h && [6, 8, 12].includes(rel(h, bhava));
+    return h && DUST.includes(rel(h, bhava));
   });
   if (dust.length >= 2) {
     out.push({
@@ -131,4 +187,14 @@ export function applyVerseRules(
   }
 
   return out;
+}
+
+function ord(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+function DUSTRUCT(lordHouse: number, bhava: number): boolean {
+  return DUST.includes(rel(lordHouse, bhava));
 }
