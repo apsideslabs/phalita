@@ -1,22 +1,22 @@
 /* PHALITA — the whole design. Plain CSS, no framework, no build. */
 
 :root {
-  --ink: #1c1a17;
-  --ink-soft: #57504a;
-  --ink-faint: #9a9188;
-  --paper: #fdfaf5;
-  --paper-2: #f8f1e4;
+  --ink: #151a2d;
+  --ink-soft: #4b5268;
+  --ink-faint: #8d93a8;
+  --paper: #f7f8fc;
+  --paper-2: #eceff7;
   --card: #ffffff;
-  --rule: #e8e0d3;
-  --maroon: #8c2d19;
-  --maroon-deep: #6b2113;
-  --gold: #b08428;
-  --gold-soft: #f2e6c9;
+  --rule: #dde1ec;
+  --maroon: #24356e;
+  --maroon-deep: #18244d;
+  --gold: #c2762a;
+  --gold-soft: #f7e8d6;
   --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Noto Serif Devanagari', serif;
   --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Devanagari', sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-  --shadow-sm: 0 1px 2px rgba(28, 26, 23, 0.05);
-  --shadow: 0 2px 4px rgba(28, 26, 23, 0.04), 0 14px 32px -16px rgba(28, 26, 23, 0.18);
+  --shadow-sm: 0 1px 2px rgba(21, 26, 45, 0.06);
+  --shadow: 0 2px 4px rgba(21, 26, 45, 0.05), 0 14px 32px -16px rgba(21, 26, 45, 0.22);
 }
 
 * { box-sizing: border-box; }
@@ -39,7 +39,7 @@ img { max-width: 100%; display: block; }
 
 .nav {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(253, 250, 245, 0.88);
+  background: rgba(247, 248, 252, 0.88);
   backdrop-filter: blur(12px) saturate(140%);
   border-bottom: 1px solid var(--rule);
 }
@@ -102,10 +102,10 @@ img { max-width: 100%; display: block; }
 .hero {
   position: relative; overflow: hidden; padding: 5.5rem 0 4.5rem;
   background:
-    radial-gradient(52rem 26rem at 82% -18%, rgba(176, 132, 40, 0.20), transparent 60%),
-    radial-gradient(44rem 24rem at 8% 8%, rgba(140, 45, 25, 0.09), transparent 58%),
-    repeating-linear-gradient(135deg, rgba(140, 45, 25, 0.028) 0 1px, transparent 1px 14px),
-    linear-gradient(180deg, #fffdf9 0%, var(--paper) 70%);
+    radial-gradient(52rem 26rem at 82% -18%, rgba(194, 118, 42, 0.16), transparent 60%),
+    radial-gradient(44rem 24rem at 8% 8%, rgba(36, 53, 110, 0.10), transparent 58%),
+    repeating-linear-gradient(135deg, rgba(36, 53, 110, 0.028) 0 1px, transparent 1px 14px),
+    linear-gradient(180deg, #ffffff 0%, var(--paper) 70%);
   border-bottom: 1px solid var(--rule);
 }
 .hero .inner { max-width: 70rem; margin: 0 auto; padding: 0 1.5rem; }
@@ -120,7 +120,7 @@ img { max-width: 100%; display: block; }
 }
 .hero h1 em {
   font-style: normal; color: var(--maroon);
-  background: linear-gradient(180deg, transparent 62%, rgba(176, 132, 40, 0.28) 62%);
+  background: linear-gradient(180deg, transparent 62%, rgba(194, 118, 42, 0.26) 62%);
 }
 .hero .lede {
   margin: 1.6rem 0 0; max-width: 34rem;
@@ -135,8 +135,8 @@ img { max-width: 100%; display: block; }
   transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 .btn.primary {
-  background: linear-gradient(180deg, #9c3520 0%, var(--maroon) 100%);
-  color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, var(--shadow);
+  background: linear-gradient(180deg, #2f4585 0%, var(--maroon) 100%);
+  color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,0.16) inset, var(--shadow);
 }
 .btn.primary:hover { background: var(--maroon-deep); transform: translateY(-1px); text-decoration: none; }
 .btn.ghost { border: 1px solid var(--rule); color: var(--ink); background: var(--card); }
@@ -161,10 +161,7 @@ img { max-width: 100%; display: block; }
 /* ============ sections ============ */
 
 .section { padding: 5rem 0; border-bottom: 1px solid var(--rule); }
-.section.alt {
-  background:
-    linear-gradient(180deg, var(--paper-2) 0%, #fbf6ec 100%);
-}
+.section.alt { background: linear-gradient(180deg, var(--paper-2) 0%, #f2f4fa 100%); }
 .section .rule {
   width: 2.5rem; height: 2px; background: var(--gold);
   border-radius: 2px; margin-bottom: 1.2rem;
@@ -192,7 +189,7 @@ img { max-width: 100%; display: block; }
   background: linear-gradient(90deg, var(--maroon), var(--gold));
   opacity: 0; transition: opacity 0.18s ease;
 }
-.card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: #ddd2bf; }
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: #cdd4e4; }
 .card:hover::before { opacity: 1; }
 .card h3 {
   font-family: var(--serif); font-size: 1.1rem; font-weight: 600;
@@ -233,8 +230,8 @@ img { max-width: 100%; display: block; }
 .band {
   padding: 4.5rem 0; text-align: center;
   background:
-    radial-gradient(40rem 18rem at 50% 0%, rgba(176, 132, 40, 0.22), transparent 62%),
-    linear-gradient(180deg, #fbf6ec 0%, var(--paper-2) 100%);
+    radial-gradient(40rem 18rem at 50% 0%, rgba(194, 118, 42, 0.18), transparent 62%),
+    linear-gradient(180deg, #f2f4fa 0%, var(--paper-2) 100%);
   border-bottom: 1px solid var(--rule);
 }
 .band h2 { font-family: var(--serif); font-size: clamp(1.5rem, 2.6vw, 2.05rem); margin: 0; letter-spacing: -0.02em; }
