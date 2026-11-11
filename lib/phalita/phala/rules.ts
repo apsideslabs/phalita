@@ -57,6 +57,8 @@ export interface Finding {
   side: 'a' | 'b';
   weight: number;
   ground: string;
+  /** Set when a severe finding was tested against its compound condition. */
+  compound?: 'satisfied' | 'single-condition';
 }
 
 /**
@@ -177,7 +179,65 @@ export function readBhava(chart: JyotishaChart, h: number): Finding[] {
     }
   }
 
-  return out;
+  return applyCompoundGate(out, chart, h);
+}
+
+/**
+ * The compound gate — Phaladīpikā 15.3 and 15.6, and MOD02 of the audit.
+ *
+ * 15.3 does not say "a weak lord damages the house". It names a configuration:
+ * the lord in an adverse place, combust, in an enemy sign or debilitated, AND
+ * without benefic association. 15.6 goes further — the verse itself states that
+ * two or three conditions must agree before a severe loss is declared.
+ *
+ * So a severe finding that stands on one clause alone is not a severe finding.
+ * It is downgraded here, explicitly, rather than silently dropped: the engine
+ * keeps the evidence and lowers the claim.
+ */
+function applyCompoundGate(out: Finding[], chart: JyotishaChart, h: number): Finding[] {
+  const house = chart.bhavas[h - 1];
+  if (!house) return out;
+  const lord = house.rashiLord as PlanetId;
+  const p = chart.planets[lord];
+  const occ = (house.planetsInHouse ?? []) as PlanetId[];
+
+  // How many ways is the lord afflicted? (15.3's clauses)
+  let afflictions = 0;
+  if (p) {
+    if (DUS.includes(p.house)) afflictions += 1;
+    if (p.isCombust) afflictions += 1;
+    if (p.dignity === 'Debilitated (Neecha)' || p.dignity.startsWith('Enemy') || p.dignity.startsWith('Great Enemy')) afflictions += 1;
+  }
+  // Is there benefic protection? (15.3's qualifying clause, MOD01)
+  const beneficWith = occ.some((o) => BEN.includes(o));
+  const beneficAspect = BEN.some((b) => (chart.planets[b].aspectsToHouses ?? []).includes(h));
+
+  // 15.6 / MOD02: weak lord, weak kāraka, malefic enclosure — two of three.
+  const kar = KARAKA[h];
+  const kp = kar ? chart.planets[kar] : undefined;
+  const weakKaraka = !!kp && (kp.dignity === 'Debilitated (Neecha)' || kp.dignity.startsWith('Enemy') || DUS.includes(kp.house));
+  const maleficWith = occ.some((o) => MAL.includes(o));
+  const maleficAspect = MAL.some((m) => (chart.planets[m].aspectsToHouses ?? []).includes(h));
+  const enclosure = maleficWith && maleficAspect;
+  const weakLord = afflictions >= 2;
+  const compoundCount = [weakLord, weakKaraka, enclosure].filter(Boolean).length;
+
+  return out.map((f) => {
+    if (f.side !== 'b' || f.weight < 2) return f; // only the severe claims
+
+    // A severe claim needs 15.3's whole configuration and 15.6's two-of-three.
+    const severeOk = afflictions >= 2 && compoundCount >= 2 && !(beneficWith || beneficAspect);
+
+    if (severeOk) {
+      return { ...f, compound: 'satisfied' as const };
+    }
+    return {
+      ...f,
+      weight: Math.min(f.weight, 1.2),
+      compound: 'single-condition' as const,
+      text: `${f.text} — but this is a single condition, and Phaladīpikā 15.3 and 15.6 require the full configuration before a severe reading is declared, so it is weighed as a caution rather than a result`,
+    };
+  });
 }
 
 /** Every bhāva a question names, read together. */
