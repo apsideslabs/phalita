@@ -39,6 +39,19 @@ export const BHAVA_MEANING: Record<number, string> = {
 
 const name = (p: PlanetId) => GRAHA_PROPERTIES[p]?.name ?? p;
 
+/**
+ * The bhāva-kāraka: the graha the text makes the natural significator of each
+ * house. Phaladīpikā 15.15–17 keeps this as a layer separate from the lord, and
+ * 15.20–25 says the bhāva, its lord and its kāraka are judged together.
+ */
+const KARAKA: Record<number, PlanetId> = {
+  1: 'sun', 2: 'jupiter', 3: 'mars', 4: 'moon', 5: 'jupiter', 6: 'mars',
+  7: 'venus', 8: 'saturn', 9: 'jupiter', 10: 'sun', 11: 'jupiter', 12: 'saturn',
+};
+
+/** Position of house x counted from house h as the reference ascendant. */
+const rel = (x: number, h: number) => ((x - h + 12) % 12) + 1;
+
 export interface Finding {
   text: string;
   side: 'a' | 'b';
@@ -107,6 +120,46 @@ export function readBhava(chart: JyotishaChart, h: number): Finding[] {
   }
   if (mAsp.length) {
     out.push({ text: `${mAsp.map(name).join(' and ')} ${mAsp.length > 1 ? 'aspect' : 'aspects'} the ${ORD[h]} — ${meaning} is pressed on by malefics`, side: 'b', weight: 1.4, ground: 'Phaladīpikā 15.1' });
+  }
+
+  // ---- PH15.2 and PH15.4: count relative houses from the queried bhāva. ----
+  // The text judges a house as its own ascendant: benefics in kendras and
+  // trines from it support it, malefics in the 6th, 8th or 12th from it damage
+  // it. Counting from the Lagna alone, as most engines do, misses this.
+  for (const b of BEN) {
+    const r = rel(chart.planets[b].house, h);
+    if (r === 1) continue; // occupancy already handled above
+    if ([5, 9].includes(r)) {
+      out.push({ text: `${name(b)} stands in the ${ORD[r]} from the ${ORD[h]} — a trine support to ${meaning}`, side: 'a', weight: 1.7, ground: 'Phaladīpikā 15.2, benefics in trines from the examined house' });
+    } else if ([4, 7, 10].includes(r)) {
+      out.push({ text: `${name(b)} stands in the ${ORD[r]} from the ${ORD[h]} — a kendra support to ${meaning}`, side: 'a', weight: 1.3, ground: 'Phaladīpikā 15.2, benefics in kendras from the examined house' });
+    }
+  }
+  for (const m of MAL) {
+    const r = rel(chart.planets[m].house, h);
+    if (r === 1) continue;
+    if (DUS.includes(r)) {
+      out.push({ text: `${name(m)} stands in the ${ORD[r]} from the ${ORD[h]} — this damages ${meaning}`, side: 'b', weight: 1.7, ground: 'Phaladīpikā 15.4, malefics in the 6th, 8th or 12th from the examined house' });
+    }
+  }
+
+  // ---- PH15.20–25: judge the bhāva, its lord and its kāraka together. ----
+  const kar = KARAKA[h];
+  if (kar && kar !== lord) {
+    const kp = chart.planets[kar];
+    if (kp) {
+      const kd = kp.dignity;
+      if (kd === 'Exalted (Ucca)' || kd === 'Own Sign (Swakshetra)' || kd === 'Moolatrikona') {
+        out.push({ text: `the kāraka of the ${ORD[h]}, ${name(kar)}, is ${kd} in the ${ORD[kp.house]} — the natural significator of ${meaning} is itself strong`, side: 'a', weight: 1.9, ground: 'Phaladīpikā 15.20–25, bhāva, bhāveśa and kāraka judged together' });
+      } else if (kd === 'Debilitated (Neecha)' || kd.startsWith('Enemy')) {
+        out.push({ text: `the kāraka of the ${ORD[h]}, ${name(kar)}, is ${kd} — the natural significator of ${meaning} is itself weak`, side: 'b', weight: 1.9, ground: 'Phaladīpikā 15.20–25' });
+      }
+      if (DUS.includes(kp.house)) {
+        out.push({ text: `the kāraka of the ${ORD[h]}, ${name(kar)}, sits in the ${ORD[kp.house]}, a duḥsthāna — ${meaning} is pulled towards loss`, side: 'b', weight: 1.3, ground: 'Phaladīpikā 15.20–25' });
+      } else if (KENDRA.includes(kp.house)) {
+        out.push({ text: `the kāraka of the ${ORD[h]}, ${name(kar)}, stands in the ${ORD[kp.house]}, a kendra — ${meaning} has a visible footing`, side: 'a', weight: 1.1, ground: 'Phaladīpikā 15.20–25' });
+      }
+    }
   }
 
   // The lord's ṣaḍbala against the mean of the seven.
