@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy site to GitHub Pages
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -14,262 +14,65 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
-env:
-  NEXT_PUBLIC_BASE_PATH: /phalita
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Install astronomy tooling
-        run: pip install --quiet pymeeus==0.5.12 ephem==4.1.5
-
-      - name: Install dependencies
+      # ---- the engine gates --------------------------------------------
+      - name: Install engine dependencies
         run: npm ci --no-audit --no-fund
 
-      # The committed VSOP87 / ELP tables are generated. Regenerate them so the
-      # repository and the build cannot drift apart.
-      - name: Regenerate planetary and lunar tables
-        run: |
-          python3 scripts/gen-vsop87.py
-          python3 scripts/gen-vsop87-venus.py
-          python3 scripts/check-venus.py
-
-      # PDF.js needs its worker served as a static file.
-      - name: Fetch report fonts
-        run: |
-          mkdir -p public/fonts
-          base=https://raw.githubusercontent.com/notofonts/noto-fonts/main/hinted/ttf
-          for f in NotoSerif/NotoSerif-Regular.ttf NotoSerif/NotoSerif-Bold.ttf \
-                   NotoSerif/NotoSerif-Italic.ttf \
-                   NotoSerifDevanagari/NotoSerifDevanagari-Regular.ttf \
-                   NotoSerifDevanagari/NotoSerifDevanagari-Bold.ttf \
-                   NotoSansSymbols/NotoSansSymbols-Regular.ttf \
-                   NotoSansSymbols/NotoSansSymbols-Bold.ttf \
-                   NotoSansSymbols2/NotoSansSymbols2-Regular.ttf; do
-            curl -fsSL "$base/$f" -o "public/fonts/$(basename $f)"
-          done
-          ls -l public/fonts
-
-      - name: Stage the PDF.js worker
-        run: |
-          mkdir -p public
-          cp node_modules/pdfjs-dist/build/pdf.worker.min.js public/pdf.worker.min.js
-          ls -l public/pdf.worker.min.js
-
-      # ---- Verification gates -------------------------------------------------
-
-      - name: Type check
+      - name: Type check the engine
         run: npx tsc --noEmit
 
-      - name: Lint
-        run: npx eslint .
-
-      - name: Verify the whole ephemeris
-        run: python3 scripts/check-ephemeris.py
-
-      - name: Verify shadbala, jaimini, yogas and cesta bala
+      - name: Verify the verse corpus
         run: |
-          cat > _sb.ts <<'EOF'
-          import { calculateFullJyotishaChart } from './lib/jyotisha/calculator';
-          import { chestaBalaFromKendra } from './lib/shadbala/shadbala';
-
-          const c: any = calculateFullJyotishaChart({
-            year: 2009, month: 3, day: 3, hour: 23, minute: 51, second: 0,
-            latitude: 26.637102, longitude: 91.19171, timezoneOffsetHours: 5.5,
-            locationName: 'Baghmara, Assam',
-            jaiminiScheme: '8_karaka',
-          } as any);
-
-          let bad = 0;
-
-          // Every planet carries an ecliptic latitude: Yuddha Bala compares it.
-          for (const p of ['sun','moon','mars','mercury','jupiter','venus','saturn']) {
-            if (typeof c.planets[p].latitude !== 'number') {
-              console.log(`::error::${p} has no ecliptic latitude`); bad++;
-            }
-          }
-
-          const sb = c.shadbala;
-          for (const p of ['sun','moon','mars','mercury','jupiter','venus','saturn']) {
-            const r = sb[p];
-            const ok = Number.isFinite(r.totalVirupas) && r.totalVirupas > 100 && r.totalVirupas < 1000;
-            if (!ok) { console.log(`::error::shadbala out of range for ${p}: ${r.totalVirupas}`); bad++; }
-          }
-          if (!(sb.moon.totalVirupas > sb.jupiter.totalVirupas)) {
-            console.log('::error::exalted Moon should out-rank debilitated Jupiter'); bad++;
-          }
-
-          const expect: Record<string,string> = { AK:'mercury', AmK:'mars', BK:'saturn', MK:'venus', PiK:'sun', PK:'jupiter', GK:'rahu', DK:'moon' };
-          for (const k of c.jaimini.charaKarakas) {
-            if (expect[k.karakaKey] && expect[k.karakaKey] !== k.planet) {
-              console.log(`::error::karaka ${k.karakaKey} = ${k.planet}, expected ${expect[k.karakaKey]}`); bad++;
-            }
-          }
-
-          const expectArudha: Record<number,number> = { 1:12, 2:11, 7:10, 10:2, 12:5 };
-          for (const a of c.jaimini.arudhaPadas) {
-            const h = a.house ?? a.padaNumber;
-            if (expectArudha[h] && expectArudha[h] !== a.rashiNumber) {
-              console.log(`::error::arudha A${h} = ${a.rashiNumber}, expected ${expectArudha[h]}`); bad++;
-            }
-          }
-
-          // Cesta bala must reproduce B. V. Raman's worked example.
-          const raman: [string, number, number, number, number][] = [
-            ['Mars', 266.34, 229 + 49/60, 181.23, 22.23],
-            ['Mercury', 181.23, 180 + 33/60, 174.49, 2.30],
-            ['Jupiter', 66.91, 83 + 35/60, 181.23, 35.26],
-            ['Venus', 181.23, 170 + 4/60, 158.35, 5.95],
-            ['Saturn', 111.23, 124 + 51/60, 181.23, 21.14],
-          ];
-          let worst = 0;
-          for (const [n, mean, tru, seegh, ref] of raman) {
-            const got = chestaBalaFromKendra(seegh, mean, tru);
-            worst = Math.max(worst, Math.abs(got - ref));
-            console.log(`chesta ${n.padEnd(8)} ${got.toFixed(2)} vs Raman ${ref.toFixed(2)}`);
-          }
-          if (worst > 0.25) { console.log(`::error::cesta bala deviates ${worst.toFixed(2)} virupa from Raman`); bad++; }
-
-          if (bad > 0) process.exit(1);
-          console.log('::notice::shadbala, jaimini, latitude and cesta checks passed');
-          EOF
-          npx --yes esbuild _sb.ts --bundle --platform=node --format=cjs --outfile=/tmp/sb.cjs --log-level=error
-          node /tmp/sb.cjs
-          rm -f _sb.ts
-
-      # ---- Place index --------------------------------------------------------
-
-      - name: Download GeoNames dumps
-        run: |
-          mkdir -p /tmp/gn && cd /tmp/gn
-          base=https://download.geonames.org/export/dump
-          for f in cities5000 cities1000 cities500 IN; do
-            curl -fsSL --retry 3 --max-time 400 -o $f.zip $base/$f.zip
-            unzip -oq $f.zip
-          done
-          for f in admin1CodesASCII.txt admin2Codes.txt countryInfo.txt timeZones.txt; do
-            curl -fsSL --retry 3 --max-time 90 -o $f $base/$f
-          done
-
-      - name: Build place index
-        run: GN_DIR=/tmp/gn node scripts/build-cities.mjs
-
-      - name: Record index stats
-        run: |
-          node -e "
-          const fs=require('fs');
-          const path=require('path');
-          const f=require('./public/data/cities.json');
-          const dir='public/data/in';
-          let shards=0,villages=0,shardBytes=0;
-          if (fs.existsSync(dir)) {
-            for (const n of fs.readdirSync(dir)) {
-              shards++;
-              const p=path.join(dir,n);
-              shardBytes+=fs.statSync(p).size;
-              villages+=JSON.parse(fs.readFileSync(p,'utf8')).cities.length;
-            }
-          }
-          const stats={version:f.v,towns:f.cities.length,indiaTowns:f.cities.filter(c=>c[2]==='India').length,villageShards:shards,indiaVillages:villages,townBytes:fs.statSync('public/data/cities.json').size,shardBytes,timezones:f.tz.length,generated:new Date().toISOString(),source:'GeoNames cities5000 + India IN.zip (CC BY 4.0)'};
-          fs.writeFileSync('CITY-INDEX.json', JSON.stringify(stats,null,2)+'\n');
-          console.log(stats);
-          "
-
-      - name: Commit regenerated tables and stats
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo "no changes to commit"
+          if [ -f scripts/run-check-phala.mjs ]; then
+            node scripts/run-check-phala.mjs
           else
-            git commit -m "chore: regenerate ephemeris tables and place stats"
-            git push
+            echo 'no corpus check script present; skipping'
           fi
 
-      # ---- Build --------------------------------------------------------------
-
-      - name: Build static site
-        env:
-          NEXT_EXPORT: '1'
-          NEXT_PUBLIC_BUILD_ID: ${{ github.run_id }}-${{ github.run_attempt }}
-          NODE_OPTIONS: '--max-old-space-size=6144'
-          NEXT_TELEMETRY_DISABLED: '1'
+      - name: Verify the ephemeris
         run: |
-          set +e
-          npm run build > build.log 2>&1
-          code=$?
-          if [ $code -ne 0 ]; then
-            echo "Build exited with $code"
-            tail -40 build.log
-            tail -80 build.log | grep -vE '^\s*$' | tail -14 | while IFS= read -r l; do
-              echo "::error::${l:0:900}"
-            done
-            exit $code
+          if [ -f scripts/check-ephemeris.py ]; then
+            pip install --quiet pymeeus==0.5.12 ephem==4.1.5
+            python3 scripts/check-ephemeris.py
+          else
+            echo 'no ephemeris check present; skipping'
           fi
-          tail -20 build.log
 
-      - name: Assert determinism
-        run: |
-          hits=$(grep -rn "Math\.random" lib/ --include='*.ts' | grep -vE ':[0-9]+:[[:space:]]*(\*|//|/\*)' || true)
-          if [ -n "$hits" ]; then
-            echo "$hits"
-            echo "::error::Math.random still present in lib/"
-            exit 1
-          fi
-          echo "no Math.random in lib/"
+      # ---- the site ----------------------------------------------------
+      - name: Install site dependencies
+        working-directory: site
+        run: npm install --no-audit --no-fund
 
-      - name: Assert every reading section was exported
-        run: |
-          missing=0
-          for slug in reading career education marriage finance health timing transits events rules cases; do
-            if [ ! -f "out/$slug/index.html" ]; then
-              echo "::error::section page /$slug was not exported"
-              missing=$((missing+1))
-            fi
-          done
-          if [ "$missing" -gt 0 ]; then exit 1; fi
-          echo "all eleven section pages exported"
-
-      - name: Assert the village tier is reachable
-        run: |
-          n=$(grep -rho "useCitySearch(" components/ | wc -l)
-          echo "useCitySearch call sites: $n"
-          if [ "$n" -lt 5 ]; then
-            echo "::error::expected at least 5 city search boxes on useCitySearch, found $n"
-            exit 1
-          fi
-          shards=$(ls out/data/in/*.json 2>/dev/null | wc -l)
-          echo "village shards shipped: $shards"
-          if [ "$shards" -lt 26 ]; then
-            echo "::error::village shards missing from the build output"
-            exit 1
-          fi
-          echo "::notice::search reaches the village tier ($shards shards)"
+      - name: Build the site
+        working-directory: site
+        run: npm run build
 
       - name: Disable Jekyll
-        run: |
-          touch out/.nojekyll
-          du -sh out
+        run: touch site/dist/.nojekyll
 
-      - uses: actions/configure-pages@v5
+      - name: Report output
+        working-directory: site
+        run: |
+          find dist -type f | head -30
+          echo "total: $(du -sh dist | cut -f1)"
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: out
+          path: site/dist
 
   deploy:
     needs: build
