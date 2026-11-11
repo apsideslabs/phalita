@@ -1,0 +1,95 @@
+/* PHALITA — nav and landing. Kept out of app.css so the reading stylesheet
+   stays the size it is. */
+
+/* ---- nav ---- */
+
+.nav {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; padding: 0.85rem 1.5rem;
+  background: rgba(251, 249, 245, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule);
+}
+.nav .mark {
+  font-family: var(--serif); font-size: 0.95rem; font-weight: 600;
+  color: var(--ink); text-decoration: none; letter-spacing: -0.01em;
+}
+.nav .mark .deva { color: var(--accent); margin-right: 0.35rem; }
+.nav .links { display: flex; gap: 1.4rem; }
+.nav .links a {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-faint); text-decoration: none;
+}
+.nav .links a:hover, .nav .links a.on { color: var(--accent); }
+
+/* ---- hero ---- */
+
+.hero { padding: 4.5rem 0 0; }
+.hero h1 {
+  font-size: 2.6rem; font-weight: 600; line-height: 1.15;
+  letter-spacing: -0.025em; margin: 0.9rem 0 0; max-width: 22ch;
+}
+.hero .lede {
+  margin: 1.4rem 0 0; font-size: 1.08rem; line-height: 1.75;
+  color: var(--ink-soft); max-width: 34rem;
+}
+.hero .cta {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  margin-top: 2.2rem; padding: 0.85rem 1.7rem;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; text-decoration: none;
+  background: var(--accent); color: #fff; border-radius: 3px;
+}
+.hero .cta:hover { background: #6f2314; }
+.hero .cta span { font-size: 14px; }
+
+/* ---- sample ---- */
+
+.sample { margin-top: 5rem; padding-top: 2.5rem; border-top: 1px solid var(--rule); }
+.excerpt {
+  margin-top: 1.4rem; padding: 1.75rem 1.9rem;
+  background: var(--panel); border: 1px solid var(--rule); border-radius: 4px;
+  border-left: 3px solid #cddfd2;
+}
+.sample-title {
+  font-size: 1.2rem; font-weight: 600; margin: 0 0 1rem;
+}
+.sample-title span {
+  display: block; font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-faint); font-weight: 400; margin-top: 0.3rem;
+}
+.excerpt p { margin: 0 0 0.95rem; font-size: 1rem; line-height: 1.85; }
+.excerpt p:last-child { margin-bottom: 0; }
+
+/* ---- sections ---- */
+
+.what, .how, .rules { margin-top: 4.5rem; padding-top: 2.5rem; border-top: 1px solid var(--rule); }
+.what h2, .how h2, .rules h2 {
+  font-size: 1.35rem; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 1.2rem;
+}
+
+.chapters { list-style: none; margin: 0; padding: 0; }
+.chapters li {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem;
+  padding: 0.7rem 0; border-bottom: 1px solid var(--rule);
+}
+.chapters li:last-child { border-bottom: 0; }
+.chapters strong { font-weight: 600; font-size: 0.98rem; }
+.chapters span {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+
+.how ol { margin: 0; padding-left: 1.2rem; }
+.how li { margin-bottom: 0.7rem; font-size: 0.98rem; line-height: 1.75; color: var(--ink-soft); }
+
+.rules p { margin: 0 0 1rem; font-size: 0.98rem; line-height: 1.8; color: var(--ink-soft); }
+.rules p:last-child { margin-bottom: 0; }
+
+@media (max-width: 560px) {
+  .hero h1 { font-size: 2rem; }
+  .nav .links { gap: 1rem; }
+  .excerpt { padding: 1.25rem 1.15rem; }
+}

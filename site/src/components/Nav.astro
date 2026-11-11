@@ -1,0 +1,19 @@
+---
+const path = Astro.url.pathname.replace(/\/$/, '');
+const links = [
+  { href: `${import.meta.env.BASE_URL}reading`, label: 'Reading' },
+  { href: `${import.meta.env.BASE_URL}about`, label: 'About' },
+  { href: `${import.meta.env.BASE_URL}documentation`, label: 'Sources' },
+];
+---
+
+<nav class="nav">
+  <a class="mark" href={import.meta.env.BASE_URL}>
+    <span class="deva">फल</span> Phalita
+  </a>
+  <div class="links">
+    {links.map((l) => (
+      <a href={l.href} class={path.endsWith(l.label.toLowerCase()) ? 'on' : ''}>{l.label}</a>
+    ))}
+  </div>
+</nav>
