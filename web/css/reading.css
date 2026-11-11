@@ -1,4 +1,4 @@
-/* PHALITA — the reading page. */
+/* PHALITA — the reading page. Cards, not columns of prose. */
 
 /* ---- head + form ---- */
 
@@ -61,7 +61,7 @@
   font-size: 0.92rem; line-height: 1.7; color: var(--ink-soft);
 }
 
-/* ---- period shifts timeline ---- */
+/* ---- period shifts ---- */
 
 .shifts { margin-top: 2.5rem; }
 .shifts h2 {
@@ -114,45 +114,102 @@
 }
 .tl-cta:hover { background: rgba(242,107,29,0.06); text-decoration: none; }
 
-/* ---- chapters ---- */
+/* ---- chapters as cards ---- */
 
-.chapter { margin-top: 3rem; }
-.chapter h2 {
-  font-family: var(--sans); font-size: 1.25rem; font-weight: 800;
-  letter-spacing: -0.025em; margin: 0; line-height: 1.25; color: #141414;
+.chapters { margin-top: 2.6rem; display: flex; flex-direction: column; gap: 0.9rem; }
+
+.ch {
+  background: #fff; border: 1px solid transparent; border-radius: 18px;
+  padding: 1.2rem 1.15rem 1.15rem;
+  box-shadow: 0 1px 2px rgba(60,40,20,0.04), 0 10px 24px -18px rgba(60,40,20,0.35);
 }
-.chapter .strap {
-  margin: 0.3rem 0 0; font-family: var(--serif); font-style: italic;
-  font-size: 0.85rem; color: #9a9a9a;
+.ch-head { display: flex; align-items: center; gap: 0.7rem; }
+.ch-head .disc {
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  width: 2.7rem; height: 2.7rem; border-radius: 999px; background: #f8edda;
 }
-.chapter .body { margin-top: 0.9rem; padding-left: 1rem; border-left: 3px solid var(--rule); }
-.chapter.strong .body { border-left-color: #bfe0cb; }
-.chapter.strained .body { border-left-color: #f2cfc6; }
-.chapter p { margin: 0 0 0.9rem; font-size: 0.99rem; line-height: 1.8; }
-.chapter p:last-child { margin-bottom: 0; }
-.chapter p:first-child { font-size: 1.05em; line-height: 1.72; }
+.ch-head .disc .emoji { font-size: 1.25rem; line-height: 1; }
+.ch-title { flex: 1; min-width: 0; }
+.ch-title h2 {
+  font-family: var(--sans); font-size: 1.02rem; font-weight: 800;
+  letter-spacing: -0.02em; margin: 0; line-height: 1.25; color: #141414;
+}
+.ch-title .strap {
+  margin: 0.15rem 0 0; font-family: var(--serif); font-style: italic;
+  font-size: 0.76rem; color: #9a9a9a;
+}
+.tag {
+  flex-shrink: 0; padding: 0.2rem 0.55rem; border-radius: 999px;
+  font-size: 0.62rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.tag.strong { background: #e8f3ec; color: #2f6b4f; }
+.tag.mixed { background: #fdf3e2; color: #8a6316; }
+.tag.strained { background: #fdeeea; color: #9a3b2c; }
+
+.ch-lead {
+  margin: 0.9rem 0 0; font-size: 0.95rem; line-height: 1.7; color: #4a4a4a;
+}
+
+.grp { margin-top: 0.9rem; }
+.glabel {
+  display: block; font-size: 0.6rem; font-weight: 800;
+  letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 0.4rem;
+}
+.grp.good .glabel { color: #2f6b4f; }
+.grp.bad .glabel { color: #9a3b2c; }
+.grp ul { list-style: none; margin: 0; padding: 0; }
+.grp li {
+  position: relative; padding-left: 1.15rem; margin-bottom: 0.4rem;
+  font-size: 0.9rem; line-height: 1.6; color: #4a4a4a;
+}
+.grp li:last-child { margin-bottom: 0; }
+.grp.good li::before {
+  content: ''; position: absolute; left: 0; top: 0.45rem;
+  width: 0.45rem; height: 0.45rem; border-radius: 999px; background: #6fae86;
+}
+.grp.bad li::before {
+  content: ''; position: absolute; left: 0; top: 0.45rem;
+  width: 0.45rem; height: 0.45rem; border-radius: 999px; background: #d08a7c;
+}
+
+.when {
+  display: flex; align-items: center; gap: 0.65rem; margin-top: 0.95rem;
+  padding: 0.6rem 0.75rem; background: #fdfaf5;
+  border: 1px solid #f2e8da; border-radius: 11px;
+}
+.when .ric { flex-shrink: 0; font-size: 0.95rem; }
+.when .rlabel {
+  display: block; font-size: 0.56rem; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase; color: #9a9a9a;
+}
+.when b { font-size: 0.88rem; font-weight: 800; letter-spacing: -0.01em; }
+
+.ch-advice {
+  margin: 0.9rem 0 0; padding-top: 0.85rem; border-top: 1px solid var(--rule);
+  font-family: var(--serif); font-size: 0.93rem; font-style: italic; line-height: 1.65; color: #6a6a6a;
+}
 
 /* ---- verses ---- */
 
-.verses-wrap { margin-top: 3.5rem; padding-top: 2rem; border-top: 1px solid var(--rule); }
-.verses { margin-top: 2.2rem; }
-.verses h2 { font-family: var(--sans); font-size: 1.1rem; font-weight: 800; margin: 0 0 0.7rem; letter-spacing: -0.02em; }
-.statement { padding: 0.8rem 0; border-bottom: 1px solid var(--rule); }
+.verses-wrap { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--rule); }
+.verses { margin-top: 2rem; }
+.verses h2 { font-family: var(--sans); font-size: 1.05rem; font-weight: 800; margin: 0 0 0.6rem; letter-spacing: -0.02em; }
+.statement { padding: 0.75rem 0; border-bottom: 1px solid var(--rule); }
 .statement:last-child { border-bottom: 0; }
-.statement p { margin: 0; font-size: 0.93rem; line-height: 1.75; color: var(--ink-soft); }
+.statement p { margin: 0; font-size: 0.91rem; line-height: 1.7; color: var(--ink-soft); }
 
-.verse { margin-top: 0.4rem; }
+.verse { margin-top: 0.35rem; }
 .verse summary {
-  cursor: pointer; font-size: 0.64rem; font-weight: 700;
+  cursor: pointer; font-size: 0.62rem; font-weight: 700;
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint);
 }
 .verse summary:hover { color: var(--maroon-deep); }
 .verse .mula { margin: 0.6rem 0 0; font-size: 0.92rem; line-height: 2; color: var(--ink-soft); }
-.verse .ref { margin: 0.25rem 0 0; font-size: 0.64rem; color: var(--ink-faint); }
+.verse .ref { margin: 0.25rem 0 0; font-size: 0.62rem; color: var(--ink-faint); }
 
 /* ---- catalogue ---- */
 
-details.cat { margin-top: 3rem; padding-top: 1.6rem; border-top: 1px solid var(--rule); }
+details.cat { margin-top: 2.8rem; padding-top: 1.6rem; border-top: 1px solid var(--rule); }
 details.cat summary {
   cursor: pointer; font-size: 0.7rem; font-weight: 700;
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft);
@@ -180,4 +237,5 @@ details.q p { margin: 0 0 0.8rem; font-size: 0.9rem; line-height: 1.7; color: va
   .bform { padding: 1rem; }
   .bform label { flex: 1 1 100%; }
   .tl { padding: 1.1rem 0.9rem; }
+  .ch { padding: 1.05rem 1rem; }
 }

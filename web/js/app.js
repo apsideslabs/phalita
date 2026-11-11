@@ -1,9 +1,5 @@
 /**
  * PHALITA — the reading page. Vanilla JS, no dependencies.
- *
- * Reads the form (or the query string the landing page hands over), calls the
- * bundled engine on window.Phalita, and renders the reading as HTML strings.
- * Each renderer is a small function; nothing here knows about a framework.
  */
 (function () {
   'use strict';
@@ -14,6 +10,7 @@
   };
 
   var DAY = 86400000;
+  var TAG = { strong: 'Held', mixed: 'Mixed', strained: 'Strained' };
 
   function masthead(m) {
     var antar = m.antar ? ', with ' + esc(m.antar) + ' inside it' : '';
@@ -26,10 +23,6 @@
       '</div></section>';
   }
 
-  /**
-   * Upcoming antardasha changes, in the reference's timeline idiom. Each entry
-   * carries the phala the text gives that lord, read for this chart.
-   */
   function shifts(chart) {
     var P = window.Phalita;
     var tree = (chart.vimshottari && chart.vimshottari.tree) || [];
@@ -76,12 +69,24 @@
       '</div></section>';
   }
 
+  /** One chapter, as a card. */
   function chapter(c) {
-    var paras = c.paragraphs.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
-    return '<section class="chapter ' + c.standing + '">' +
-      '<h2>' + esc(c.title) + '</h2>' +
-      '<p class="strap">' + esc(c.strap) + '</p>' +
-      '<div class="body">' + paras + '</div></section>';
+    var gives = (c.gives || []).map(function (g) { return '<li>' + esc(g) + '</li>'; }).join('');
+    var costs = (c.costs || []).map(function (g) { return '<li>' + esc(g) + '</li>'; }).join('');
+
+    return '<article class="ch ' + c.standing + '">' +
+      '<div class="ch-head">' +
+        '<span class="disc"><span class="emoji">' + esc(c.emoji) + '</span></span>' +
+        '<div class="ch-title"><h2>' + esc(c.title) + '</h2>' +
+          '<p class="strap">' + esc(c.strap) + '</p></div>' +
+        '<span class="tag ' + c.standing + '">' + (TAG[c.standing] || '') + '</span>' +
+      '</div>' +
+      '<p class="ch-lead">' + esc(c.lead) + '</p>' +
+      (gives ? '<div class="grp good"><span class="glabel">What it gives</span><ul>' + gives + '</ul></div>' : '') +
+      (costs ? '<div class="grp bad"><span class="glabel">What it costs</span><ul>' + costs + '</ul></div>' : '') +
+      (c.when ? '<div class="when"><span class="ric">⏳</span><div><span class="rlabel">Most active</span><b>' + esc(c.when) + '</b></div></div>' : '') +
+      '<p class="ch-advice">' + esc(c.advice) + '</p>' +
+      '</article>';
   }
 
   function verse(s) {
@@ -177,7 +182,7 @@
 
     html += shifts(chart);
 
-    html += '<div class="narrow">' +
+    html += '<div class="narrow chapters">' +
       P.buildNarrative(chart).map(chapter).join('') +
       '</div>';
 
