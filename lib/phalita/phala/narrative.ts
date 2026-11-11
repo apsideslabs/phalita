@@ -5,8 +5,9 @@
  * chart gives and what it costs, the period it is active in, and one closing
  * sentence.
  *
- * The findings are passed through the verse rules first, so a specific verse
- * (15.9, 12.3, 15.19, 10.1) can adjust or add to what the general layer saw.
+ * Findings are passed through the verse rules first. A line uses the rule's
+ * sourced `predicts` where one exists and the finding's own condition where it
+ * does not — no outcome is invented.
  */
 
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
@@ -225,8 +226,11 @@ export function buildNarrative(chart: JyotishaChart): Chapter[] {
     const standing: Chapter['standing'] =
       pos > neg * 1.25 ? 'strong' : neg > pos * 1.25 ? 'strained' : 'mixed';
 
-    const gives = lines(good.map((f) => f.predicts));
-    const costs = lines(bad.map((f) => f.predicts));
+    // Fall back to the finding's own sentence: with the generic outcome table
+    // gone, a line without a sourced `predicts` states the condition itself
+    // rather than inventing an outcome.
+    const gives = lines(good.map((f) => f.predicts || f.text));
+    const costs = lines(bad.map((f) => f.predicts || f.text));
 
     if (s.id === 'career') {
       const a = careerMode(chart);
