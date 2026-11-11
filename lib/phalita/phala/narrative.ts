@@ -205,8 +205,8 @@ function periodFor(chart: JyotishaChart, bhava: number): string | null {
   if (!hit || !hit.startDate || !hit.endDate) return null;
 
   try {
-    const from = parseDashaDate(hit.startDate).getFullYear();
-    const to = parseDashaDate(hit.endDate).getFullYear();
+    const from = new Date(parseDashaDate(hit.startDate)).getFullYear();
+    const to = new Date(parseDashaDate(hit.endDate)).getFullYear();
     const name = GRAHA_PROPERTIES[lord]?.name ?? lord;
     return `${name} period, ${from} to ${to}`;
   } catch {
