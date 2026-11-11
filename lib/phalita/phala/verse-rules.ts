@@ -4,9 +4,6 @@
  * The rules in rules.ts judge a bhāva from its lord, occupants and aspects.
  * These are different: each is a specific verse of Phaladīpikā with a condition
  * it states, and each changes the reading in a way the general rules cannot.
- *
- * They are applied after the general findings, and they either adjust one or add
- * a finding of their own — always with the verse that produced it.
  */
 
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
@@ -23,9 +20,11 @@ const OWN: Record<string, number[]> = {
 const lordOf = (c: JyotishaChart, h: number) =>
   c.bhavas[h - 1]?.rashiLord as PlanetId | undefined;
 
+const SIGN_TABLE = RASHIS as unknown as Record<number, { sanskritName?: string }>;
+
 const signName = (c: JyotishaChart, h: number): string => {
   const n = c.bhavas[h - 1]?.rashiNumber;
-  return (n && RASHIS[n - 1]?.sanskritName) || 'that sign';
+  return (n && SIGN_TABLE[n]?.sanskritName) || 'that sign';
 };
 
 const bal = (c: JyotishaChart, p: PlanetId | undefined): number => {
@@ -40,7 +39,6 @@ const meanBala = (c: JyotishaChart): number => {
   return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
 };
 
-/** Relative house of `other` counted from `h`. */
 const rel = (other: number, h: number) => ((other - h + 12) % 12) + 1;
 
 export function applyVerseRules(
