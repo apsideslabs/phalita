@@ -52,17 +52,31 @@ jobs:
             echo 'no ephemeris check present; skipping'
           fi
 
+      # ---- the place index ----------------------------------------------
+      # GeoNames is CC BY 4.0 and cannot be committed: the data runs to ~47 MB.
+      # CI has open network, so the index is rebuilt on every deploy instead.
+      - name: Build the place index
+        run: |
+          set -e
+          mkdir -p /tmp/gn /tmp/placebuild/public
+          base=https://download.geonames.org/export/dump
+          curl -sSL --retry 3 -o /tmp/gn/cities5000.zip      $base/cities5000.zip
+          curl -sSL --retry 3 -o /tmp/gn/timeZones.txt       $base/timeZones.txt
+          curl -sSL --retry 3 -o /tmp/gn/countryInfo.txt     $base/countryInfo.txt
+          curl -sSL --retry 3 -o /tmp/gn/admin1CodesASCII.txt $base/admin1CodesASCII.txt
+          unzip -qo /tmp/gn/cities5000.zip -d /tmp/gn
+          # the script writes to public/data relative to its cwd; point that at web/
+          ln -sfn "$GITHUB_WORKSPACE/web" /tmp/placebuild/public/data
+          cd /tmp/placebuild
+          GN_DIR=/tmp/gn node "$GITHUB_WORKSPACE/scripts/build-cities.mjs"
+          ls -la "$GITHUB_WORKSPACE/web/data" | head
+
       # ---- the site -----------------------------------------------------
       - name: Bundle the engine for the browser
         run: npm run bundle
 
       - name: Disable Jekyll
         run: touch web/.nojekyll
-
-      - name: Report output
-        run: |
-          find web -maxdepth 2 -type f | sort | head -30
-          echo "total: $(du -sh web | cut -f1)"
 
       - uses: actions/upload-pages-artifact@v3
         with:

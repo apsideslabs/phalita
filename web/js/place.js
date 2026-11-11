@@ -4,8 +4,9 @@
  * Typing latitude and longitude is a developer's form. This fills them from a
  * city name and leaves the manual fields for anywhere not listed.
  *
- * Format: Name|Region|lat|lon|utcOffset
- * Offsets are standard time — India has no DST, some countries do.
+ * Two sources: the full GeoNames index built by CI into ./data/cities.json
+ * (70,755 towns, loaded lazily on first focus), and a built-in list of about
+ * 140 cities that works with no network at all.
  */
 (function () {
   'use strict';
@@ -189,21 +190,67 @@
 
   function label(p) { return p.name + ', ' + p.region; }
 
+  /**
+   * The full GeoNames index, built by CI into ./data/cities.json.
+   * Format: { v, tz: [names], cities: [[name,state,country,lat,lon,tzIdx,tzOff,pop,alt]] }
+   * Loaded on first focus, once. The built-in list stays as the fallback for
+   * when the file is missing or the network is slow.
+   */
+  var remote = null, loading = null;
+
+  function loadIndex() {
+    if (loading) return loading;
+    loading = fetch('./data/cities.json')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !j.cities) return;
+        remote = j.cities.map(function (c) {
+          return { name: c[0], region: c[1] || c[2], lat: c[3], lon: c[4], tz: c[6] };
+        });
+      })
+      .catch(function () { /* fall back to the built-in list */ });
+    return loading;
+  }
+
+  function search(term) {
+    var q = term.trim().toLowerCase();
+    if (q.length < 2) return [];
+    var pool = remote && remote.length ? remote : PLACES;
+    var starts = [], contains = [];
+    for (var i = 0; i < pool.length && starts.length < 20; i++) {
+      var p = pool[i];
+      var k = (p.name + ', ' + p.region).toLowerCase();
+      if (k.indexOf(q) === 0) starts.push(p);
+      else if (contains.length < 20 && k.indexOf(q) !== -1) contains.push(p);
+    }
+    return starts.concat(contains).slice(0, 20);
+  }
+
   function wire() {
     var input = document.getElementById('place');
     var list = document.getElementById('placelist');
     if (!input || !list) return;
 
-    list.innerHTML = PLACES.map(function (p) {
-      return '<option value="' + label(p) + '"></option>';
-    }).join('');
-
     var form = input.form;
     if (!form) return;
 
+    input.addEventListener('focus', loadIndex, { once: true });
+
+    var timer = null;
+    input.addEventListener('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        var hits = search(input.value);
+        list.innerHTML = hits.map(function (p) {
+          return '<option value="' + label(p) + '"></option>';
+        }).join('');
+      }, 90);
+    });
+
     var apply = function () {
       var v = input.value.trim().toLowerCase();
-      var hit = PLACES.filter(function (p) { return label(p).toLowerCase() === v; })[0];
+      var pool = remote && remote.length ? remote : PLACES;
+      var hit = pool.filter(function (p) { return label(p).toLowerCase() === v; })[0];
       if (!hit) return;
       var lat = form.elements.namedItem('lat');
       var lon = form.elements.namedItem('lon');
@@ -215,8 +262,8 @@
 
     input.addEventListener('change', apply);
     input.addEventListener('input', function () {
-      // A picked option fires change; typing only narrows the list.
-      if (PLACES.some(function (p) { return label(p).toLowerCase() === input.value.trim().toLowerCase(); })) apply();
+      var pool = remote && remote.length ? remote : PLACES;
+      if (pool.some(function (p) { return label(p).toLowerCase() === input.value.trim().toLowerCase(); })) apply();
     });
   }
 
