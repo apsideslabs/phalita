@@ -1,19 +1,19 @@
 /**
  * PHALITA — the narrative reading.
  *
- * A person does not want 250 answers, and they do not want ten paragraphs of
- * prose either. Each chapter returns structure: a lead sentence, short lines for
- * what the chart gives and what it costs, the period it is active in, and one
- * closing sentence.
+ * Each chapter returns structure: a lead sentence, short lines for what the
+ * chart gives and what it costs, the period it is active in, and one closing
+ * sentence.
  *
- * Nothing is invented here — the lines are the same findings the rule layer
- * produced, split so the eye can scan them.
+ * The findings are passed through the verse rules first, so a specific verse
+ * (15.9, 12.3, 15.19, 10.1) can adjust or add to what the general layer saw.
  */
 
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
 import { GRAHA_PROPERTIES } from '@/lib/jyotisha/constants';
 import { parseDashaDate } from '@/lib/dashas/vimshottari';
 import { readBhava, readBhavas } from './rules';
+import { applyVerseRules } from './verse-rules';
 import { careerMode, marriageMode } from './answers';
 
 export interface Chapter {
@@ -181,7 +181,6 @@ const SECTORS: Sector[] = [
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 const noDot = (s: string) => s.replace(/\.+$/, '');
 
-/** Split a prediction into its sentences, so each becomes a scannable line. */
 function lines(predicts: (string | undefined)[]): string[] {
   const out: string[] = [];
   for (const p of predicts) {
@@ -217,7 +216,7 @@ export function buildNarrative(chart: JyotishaChart): Chapter[] {
   return SECTORS.map((s) => {
     const own = readBhava(chart, s.bhavas[0]);
     const all = readBhavas(chart, s.bhavas);
-    const findings = own.length ? own : all;
+    const findings = applyVerseRules(chart, s.bhavas[0], own.length ? own : all);
 
     const good = findings.filter((f) => f.side === 'a').sort((a, b) => b.weight - a.weight);
     const bad = findings.filter((f) => f.side === 'b').sort((a, b) => b.weight - a.weight);
@@ -229,7 +228,6 @@ export function buildNarrative(chart: JyotishaChart): Chapter[] {
     const gives = lines(good.map((f) => f.predicts));
     const costs = lines(bad.map((f) => f.predicts));
 
-    // The weighed question that belongs to this sector, where there is one.
     if (s.id === 'career') {
       const a = careerMode(chart);
       if (a.answer) gives.unshift(a.answer);
