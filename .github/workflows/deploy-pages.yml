@@ -29,8 +29,8 @@ jobs:
           python-version: '3.12'
 
       # ---- the engine gates --------------------------------------------
-      - name: Install engine dependencies
-        run: npm ci --no-audit --no-fund
+      - name: Install tooling
+        run: npm install --no-audit --no-fund
 
       - name: Type check the engine
         run: npx tsc --noEmit
@@ -52,20 +52,9 @@ jobs:
             echo 'no ephemeris check present; skipping'
           fi
 
-      # ---- the bundle ---------------------------------------------------
-      - name: Install esbuild
-        run: npm install --no-save --no-audit --no-fund esbuild
-
+      # ---- the site -----------------------------------------------------
       - name: Bundle the engine for the browser
-        run: |
-          npx esbuild web/src/entry.ts \
-            --bundle \
-            --format=iife \
-            --minify \
-            --target=es2019 \
-            --tsconfig=tsconfig.json \
-            --outfile=web/js/engine.js
-          ls -lh web/js/engine.js
+        run: npm run bundle
 
       - name: Disable Jekyll
         run: touch web/.nojekyll
