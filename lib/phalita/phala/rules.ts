@@ -2,13 +2,10 @@
  * PHALITA — the rule layer.
  *
  * Each rule is a condition the texts state, tested against the chart, which
- * produces a CONCRETE finding — the planet, its sign, its house, and what the
- * text says that means for the bhāva in question. Not "supported by verse 12",
- * but "the lord of the 4th, Venus, sits exalted in Pisces in the 9th, so the
- * home is strongly founded".
+ * produces a finding carrying two things: what the text PREDICTS for the bhāva,
+ * and the evidence that produced it.
  *
- * The verse is carried in the factor list as provenance. The sentence is the
- * reading.
+ * The prediction is the reading. The evidence is why it holds.
  */
 
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
@@ -37,6 +34,22 @@ export const BHAVA_MEANING: Record<number, string> = {
   12: 'loss, foreign life and renunciation',
 };
 
+/** What the text predicts for a bhāva when it is well held, and when it is not. */
+const OUTCOME: Record<number, { good: string; bad: string }> = {
+  1: { good: 'Your body holds up and you recover quickly; people read you as capable before you speak.', bad: 'Vitality runs below your apparent strength, and energy has to be managed rather than spent.' },
+  2: { good: 'You keep what you earn; your word carries weight in money matters and you see a financial situation before others do.', bad: 'Money leaks, income stays short, and family resources do not back you.' },
+  3: { good: 'You rise with a network rather than alone, and courage comes easily.', bad: 'Siblings and peers are a point of loss rather than support; you build courage on your own.' },
+  4: { good: 'A good house, vehicles and domestic peace accumulate; the family home becomes your base.', bad: 'Property is damaged, lost or delayed, and domestic peace has to be built rather than inherited.' },
+  5: { good: 'Children, learning and creative work come easily, and your intelligence is the strongest thing you own.', bad: 'Children are delayed or a source of worry, and study is broken rather than completed.' },
+  6: { good: 'Illness does not take root, and rivals weaken on their own.', bad: 'Health, debt and open opposition take up more of life than they should.' },
+  7: { good: 'Marriage and partnership settle and hold, and partners add to what you build.', bad: 'Marriage is delayed or strained, and partnerships cost more than they return.' },
+  8: { good: 'Life runs long and without chronic obstruction; legacies and hidden resources reach you.', bad: 'Sudden turns, losses through others, and what is hidden stays hidden from you.' },
+  9: { good: 'Fortune, father and higher learning open doors; you are helped by people above you.', bad: 'Fortune is thin, the father is distant or lost early, and higher learning is cut short.' },
+  10: { good: 'Career is where you are strongest — standing, reputation and material fortune come through public work.', bad: 'Work goes unrecognised and advancement stalls; effort returns less than it should.' },
+  11: { good: 'Gains arrive steadily and through people you already know.', bad: 'Gains are contested or blocked, and income does not exceed need.' },
+  12: { good: 'Loss is light, and foreign life or retreat opens rather than costs you.', bad: 'Expenditure outruns income, and life pulls you away from where you belong.' },
+};
+
 const name = (p: PlanetId) => GRAHA_PROPERTIES[p]?.name ?? p;
 
 /**
@@ -54,6 +67,8 @@ const rel = (x: number, h: number) => ((x - h + 12) % 12) + 1;
 
 export interface Finding {
   text: string;
+  /** What the text predicts, in plain language. This is the reading. */
+  predicts?: string;
   side: 'a' | 'b';
   weight: number;
   ground: string;
@@ -125,12 +140,9 @@ export function readBhava(chart: JyotishaChart, h: number): Finding[] {
   }
 
   // ---- PH15.2 and PH15.4: count relative houses from the queried bhāva. ----
-  // The text judges a house as its own ascendant: benefics in kendras and
-  // trines from it support it, malefics in the 6th, 8th or 12th from it damage
-  // it. Counting from the Lagna alone, as most engines do, misses this.
   for (const b of BEN) {
     const r = rel(chart.planets[b].house, h);
-    if (r === 1) continue; // occupancy already handled above
+    if (r === 1) continue;
     if ([5, 9].includes(r)) {
       out.push({ text: `${name(b)} stands in the ${ORD[r]} from the ${ORD[h]} — a trine support to ${meaning}`, side: 'a', weight: 1.7, ground: 'Phaladīpikā 15.2, benefics in trines from the examined house' });
     } else if ([4, 7, 10].includes(r)) {
@@ -179,20 +191,13 @@ export function readBhava(chart: JyotishaChart, h: number): Finding[] {
     }
   }
 
+  const o2 = OUTCOME[h];
+  for (const f of out) f.predicts = f.predicts || (o2 ? (f.side === 'a' ? o2.good : o2.bad) : '');
   return applyCompoundGate(out, chart, h);
 }
 
 /**
  * The compound gate — Phaladīpikā 15.3 and 15.6, and MOD02 of the audit.
- *
- * 15.3 does not say "a weak lord damages the house". It names a configuration:
- * the lord in an adverse place, combust, in an enemy sign or debilitated, AND
- * without benefic association. 15.6 goes further — the verse itself states that
- * two or three conditions must agree before a severe loss is declared.
- *
- * So a severe finding that stands on one clause alone is not a severe finding.
- * It is downgraded here, explicitly, rather than silently dropped: the engine
- * keeps the evidence and lowers the claim.
  */
 function applyCompoundGate(out: Finding[], chart: JyotishaChart, h: number): Finding[] {
   const house = chart.bhavas[h - 1];
@@ -201,18 +206,15 @@ function applyCompoundGate(out: Finding[], chart: JyotishaChart, h: number): Fin
   const p = chart.planets[lord];
   const occ = (house.planetsInHouse ?? []) as PlanetId[];
 
-  // How many ways is the lord afflicted? (15.3's clauses)
   let afflictions = 0;
   if (p) {
     if (DUS.includes(p.house)) afflictions += 1;
     if (p.isCombust) afflictions += 1;
     if (p.dignity === 'Debilitated (Neecha)' || p.dignity.startsWith('Enemy') || p.dignity.startsWith('Great Enemy')) afflictions += 1;
   }
-  // Is there benefic protection? (15.3's qualifying clause, MOD01)
   const beneficWith = occ.some((o) => BEN.includes(o));
   const beneficAspect = BEN.some((b) => (chart.planets[b].aspectsToHouses ?? []).includes(h));
 
-  // 15.6 / MOD02: weak lord, weak kāraka, malefic enclosure — two of three.
   const kar = KARAKA[h];
   const kp = kar ? chart.planets[kar] : undefined;
   const weakKaraka = !!kp && (kp.dignity === 'Debilitated (Neecha)' || kp.dignity.startsWith('Enemy') || DUS.includes(kp.house));
@@ -223,14 +225,9 @@ function applyCompoundGate(out: Finding[], chart: JyotishaChart, h: number): Fin
   const compoundCount = [weakLord, weakKaraka, enclosure].filter(Boolean).length;
 
   return out.map((f) => {
-    if (f.side !== 'b' || f.weight < 2) return f; // only the severe claims
-
-    // A severe claim needs 15.3's whole configuration and 15.6's two-of-three.
+    if (f.side !== 'b' || f.weight < 2) return f;
     const severeOk = afflictions >= 2 && compoundCount >= 2 && !(beneficWith || beneficAspect);
-
-    if (severeOk) {
-      return { ...f, compound: 'satisfied' as const };
-    }
+    if (severeOk) return { ...f, compound: 'satisfied' as const };
     return {
       ...f,
       weight: Math.min(f.weight, 1.2),

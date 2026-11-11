@@ -6,9 +6,8 @@
  * a concrete sentence about this chart — the planet, its sign, its house, and
  * what that means for the matter in question.
  *
- * The answer is then written from those sentences: the two strongest findings
- * for the leading side, and the strongest against it. Not "supported by verse
- * 15.1" — the verse is provenance, the sentence is the reading.
+ * The answer leads with what the text PREDICTS, and carries the condition
+ * behind it as the reason.
  *
  * The corroboration rule from Phaladīpikā 15.6 governs: a question the source
  * catalogue marks serious or fatal is withheld unless two conditions agree.
@@ -18,8 +17,6 @@ import type { JyotishaChart } from '@/lib/jyotisha/types';
 import type { Question, QFactor } from './questions';
 import { DOMAINS, NOTES, QUESTIONS, ROWS } from './catalogue';
 import { readBhavas } from './rules';
-
-const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 export function buildCatalogue(chart: JyotishaChart): Question[] {
   const out: Question[] = [];
@@ -43,9 +40,12 @@ export function buildCatalogue(chart: JyotishaChart): Question[] {
     const serious = sev !== 'm';
     const thin = serious && leading < 2;
 
-    // The answer is built from the findings themselves.
-    const lead = (favourable ? good : bad).slice(0, 2).map((f) => f.text);
-    const counter = (favourable ? bad : good).slice(0, 1).map((f) => f.text);
+    // The answer leads with what the text PREDICTS, then shows the evidence.
+    const leadRaw = (favourable ? good : bad).slice(0, 2).map((f) => f.predicts || f.text);
+    const lead = Array.from(new Set(leadRaw));
+    const evidence = (favourable ? good : bad).slice(0, 1).map((f) => f.text);
+    const counter = Array.from(new Set((favourable ? bad : good).slice(0, 1).map((f) => f.predicts || f.text)))
+      .filter((t) => !lead.includes(t));
 
     let answer: string;
     if (thin) {
@@ -57,12 +57,14 @@ export function buildCatalogue(chart: JyotishaChart): Question[] {
       } The chart does not settle it, so the outcome is more likely to be decided by circumstance than by the chart.`;
     } else if (favourable) {
       answer =
-        `${lead.map((t) => cap(t)).join('. ')}.` +
-        (counter[0] ? ` What works against it: ${counter[0]}.` : ' Nothing of weight opposes it in this chart.');
+        `${lead.map((t) => cap(noDot(t))).join('; ')}.` +
+        (evidence[0] ? ` — because ${noDot(evidence[0])}.` : '') +
+        (counter[0] ? ` What works against it: ${noDot(counter[0])}.` : ' Nothing of weight opposes it in this chart.');
     } else {
       answer =
-        `${lead.map((t) => cap(t)).join('. ')}.` +
-        (counter[0] ? ` What still holds it up: ${counter[0]}.` : ' Nothing in the chart offsets it.');
+        `${lead.map((t) => cap(noDot(t))).join('; ')}.` +
+        (evidence[0] ? ` — because ${noDot(evidence[0])}.` : '') +
+        (counter[0] ? ` What still holds it up: ${noDot(counter[0])}.` : ' Nothing in the chart offsets it.');
     }
 
     const factors: QFactor[] = [...good.slice(0, 4), ...bad.slice(0, 4)].map((f) => ({
@@ -91,3 +93,6 @@ export function buildCatalogue(chart: JyotishaChart): Question[] {
 
   return out;
 }
+
+const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+const noDot = (s: string) => s.replace(/\.+$/, '');
