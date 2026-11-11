@@ -11,6 +11,7 @@
 
 import type { JyotishaChart } from '@/lib/jyotisha/types';
 import { readBhava, readBhavas } from './rules';
+import { careerMode, marriageMode } from './answers';
 
 export interface Chapter {
   id: string;
@@ -105,7 +106,11 @@ export function buildNarrative(chart: JyotishaChart): Chapter[] {
       paragraphs.push(sentence([body, reason]));
     }
 
-    // 3. What it adds up to.
+    // 3. The weighed question that belongs to this sector, where there is one.
+    if (s.id === 'career') paragraphs.push(careerMode(chart).answer);
+    if (s.id === 'marriage') paragraphs.push(marriageMode(chart).answer);
+
+    // 4. What it adds up to.
     const close =
       standing === 'strong'
         ? `Taken together, this is one of the parts of the chart you can lean on.`
