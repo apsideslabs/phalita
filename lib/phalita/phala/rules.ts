@@ -12,7 +12,7 @@
  */
 
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
-import { GRAHA_PROPERTIES, RASHIS } from '@/lib/jyotisha/constants';
+import { GRAHA_PROPERTIES } from '@/lib/jyotisha/constants';
 
 export const BEN: PlanetId[] = ['jupiter', 'venus', 'moon', 'mercury'];
 const MAL: PlanetId[] = ['sun', 'mars', 'saturn', 'rahu', 'ketu'];
@@ -120,15 +120,13 @@ export function readBhava(chart: JyotishaChart, h: number): Finding[] {
   }
 
   for (const b of BEN) {
-    const bh = chart.planets[b]?.house;
-    if (bh && chart.planets[b]?.aspectsToHouses?.includes(h)) {
+    if (chart.planets[b]?.aspectsToHouses?.includes(h)) {
       out.push({ side: 'a', weight: 1.2, ground: 'Phaladīpikā 15.2',
         text: `${name(b)} aspects the ${ORD[h]} — ${meaning} is watched over` });
     }
   }
   for (const m of MAL) {
-    const mh = chart.planets[m]?.house;
-    if (mh && chart.planets[m]?.aspectsToHouses?.includes(h)) {
+    if (chart.planets[m]?.aspectsToHouses?.includes(h)) {
       out.push({ side: 'b', weight: 1.2, ground: 'Phaladīpikā 15.4',
         text: `${name(m)} aspects the ${ORD[h]} — malefic pressure on ${meaning}` });
     }
@@ -185,6 +183,13 @@ export function readBhava(chart: JyotishaChart, h: number): Finding[] {
   return applyCompoundGate(out, chart, h);
 }
 
+/** Read several bhāvas and combine their findings. */
+export function readBhavas(chart: JyotishaChart, houses: number[]): Finding[] {
+  const out: Finding[] = [];
+  for (const h of houses) out.push(...readBhava(chart, h));
+  return out;
+}
+
 /**
  * The compound gate — Phaladīpikā 15.3 and 15.6, and MOD02 of the audit.
  */
@@ -206,12 +211,6 @@ function applyCompoundGate(out: Finding[], chart: JyotishaChart, h: number): Fin
   for (const b of BEN) {
     if (occ.includes(b)) beneficSupport += 1;
     if (chart.planets[b]?.aspectsToHouses?.includes(h)) beneficSupport += 1;
-  }
-
-  let maleficEnclosure = 0;
-  for (const m of MAL) {
-    if (occ.includes(m)) maleficEnclosure += 1;
-    if (chart.planets[m]?.aspectsToHouses?.includes(h)) maleficEnclosure += 1;
   }
 
   return out.map((f) => {
