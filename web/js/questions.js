@@ -1,9 +1,8 @@
 /**
- * PHALITA — ask the chart.
+ * PHALITA — ask the chart, by domain.
  *
- * Nothing is rendered until someone types. The 250-question catalogue is built
- * once, lazily, on the first keystroke, then filtered. Showing the whole list
- * made the page read as a quiz.
+ * Arrival shows the twenty-five domains and nothing else. Opening one evaluates
+ * only that domain's rows. The 250-question catalogue is never built whole.
  */
 (function () {
   'use strict';
@@ -13,8 +12,8 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   };
 
-  var MAX = 8;
-  var cache = null;
+  var chart = null;
+  var cache = {};
 
   function readQuery() {
     var q = new URLSearchParams(window.location.search);
@@ -31,79 +30,81 @@
     };
   }
 
-  function catalogue() {
-    if (cache) return cache;
-    if (!window.Phalita) return [];
-    var chart = window.Phalita.calculateFullJyotishaChart(readQuery());
-    cache = window.Phalita.buildCatalogue(chart);
-    return cache;
+  function ensureChart() {
+    if (!chart && window.Phalita) chart = window.Phalita.calculateFullJyotishaChart(readQuery());
+    return chart;
   }
 
-  function card(q) {
-    var factors = (q.factors || []).slice(0, 4).map(function (f) {
-      return '<li class="' + (f.side === 'a' ? 'pos' : 'neg') + '">' + esc(f.label) + '</li>';
+  /** The domain list. Rendered without touching the engine. */
+  function domains(out) {
+    var list = (window.Phalita && window.Phalita.DOMAINS) || [];
+    var tiles = list.map(function (d, i) {
+      return '<button class="dtile" data-d="' + esc(d) + '">' +
+        '<span class="dnum">' + String(i + 1).padStart(2, '0') + '</span>' +
+        '<span class="dname">' + esc(d) + '</span>' +
+        '<span class="dcount">10 questions</span>' +
+        '</button>';
     }).join('');
 
-    return '<article class="acard-q">' +
-      '<p class="qk">' + esc(q.domain) + '</p>' +
-      '<p class="qq">' + esc(q.question) + '</p>' +
-      '<p class="qa">' + esc(q.answer) + '</p>' +
-      (factors ? '<ul class="qf">' + factors + '</ul>' : '') +
-      '</article>';
+    out.innerHTML = '<p class="dhead">Twenty-five domains</p><div class="dgrid">' + tiles + '</div>';
+    out.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function search(term, out) {
-    var needle = term.trim().toLowerCase();
-    if (needle.length < 2) {
-      out.innerHTML = '<p class="hintline">Two letters is enough to start.</p>';
-      return;
-    }
-
-    var items = catalogue();
-    if (!items.length) {
+  /** One domain: its ten questions, answer behind a disclosure. */
+  function domain(name, out) {
+    if (!window.Phalita) {
       out.innerHTML = '<p class="hintline">The engine has not loaded.</p>';
       return;
     }
 
-    var hits = items.filter(function (q) {
-      return q.question.toLowerCase().indexOf(needle) !== -1 ||
-             q.domain.toLowerCase().indexOf(needle) !== -1;
-    });
-
-    if (!hits.length) {
-      out.innerHTML = '<p class="hintline">Nothing in the catalogue matches “' + esc(term) + '”. Try marriage, money, career, health.</p>';
-      return;
+    if (!cache[name]) {
+      out.innerHTML = '<p class="hintline">Reading ' + esc(name) + '…</p>';
+      try {
+        cache[name] = window.Phalita.buildCatalogue(ensureChart(), name);
+      } catch (e) {
+        out.innerHTML = '<p class="hintline">Could not read this chart: ' +
+          esc(e && e.message ? e.message : e) + '</p>';
+        return;
+      }
     }
 
-    out.innerHTML = '<p class="hintline">' + hits.length + ' answer' + (hits.length === 1 ? '' : 's') +
-      (hits.length > MAX ? ', showing the first ' + MAX : '') + '</p>' +
-      hits.slice(0, MAX).map(card).join('');
+    var items = cache[name] || [];
+    var rows = items.map(function (q) {
+      var factors = (q.factors || []).slice(0, 4).map(function (f) {
+        return '<li class="' + (f.side === 'a' ? 'pos' : 'neg') + '">' + esc(f.label) + '</li>';
+      }).join('');
+      return '<details class="dq">' +
+        '<summary>' + esc(q.question) + '</summary>' +
+        '<p class="danswer">' + esc(q.answer) + '</p>' +
+        (factors ? '<ul class="qf">' + factors + '</ul>' : '') +
+        '</details>';
+    }).join('');
+
+    out.innerHTML =
+      '<button class="dback" id="dback">← All domains</button>' +
+      '<h2 class="dtitle">' + esc(name) + '</h2>' +
+      '<p class="dsub">' + items.length + ' questions, answered from this chart</p>' +
+      '<div class="dlist">' + rows + '</div>';
+
+    out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    var back = document.getElementById('dback');
+    if (back) back.addEventListener('click', function () { domains(out); });
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    var input = document.getElementById('askinput');
     var out = document.getElementById('qout');
-    var sugg = document.getElementById('sugg');
-    var form = document.getElementById('askform');
-    if (!input || !out) return;
+    if (!out) return;
 
-    var timer = null;
-    input.addEventListener('input', function () {
-      clearTimeout(timer);
-      timer = setTimeout(function () { search(input.value, out); }, 140);
+    domains(out);
+
+    out.addEventListener('click', function (e) {
+      var tile = e.target.closest('.dtile');
+      if (tile) { domain(tile.getAttribute('data-d'), out); }
     });
 
-    if (form) form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      search(input.value, out);
-    });
-
-    if (sugg) sugg.addEventListener('click', function (e) {
-      var b = e.target.closest('button[data-q]');
-      if (!b) return;
-      input.value = b.getAttribute('data-q');
-      search(input.value, out);
-      input.focus();
-    });
+    // Deep link: ?domain=Marriage%20and%20romantic%20relationships
+    var pre = new URLSearchParams(window.location.search).get('domain');
+    if (pre) domain(pre, out);
   });
 })();

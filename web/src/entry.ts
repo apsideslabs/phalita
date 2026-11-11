@@ -10,6 +10,7 @@ import { buildNarrative } from '../../lib/phalita/phala/narrative';
 import { buildDashaPhala } from '../../lib/phalita/phala/dasha';
 import { buildReading } from '../../lib/phalita/phala/reading';
 import { buildCatalogue } from '../../lib/phalita/phala/catalogue-engine';
+import { DOMAINS } from '../../lib/phalita/phala/catalogue';
 
 (window as unknown as Record<string, unknown>).Phalita = {
   calculateFullJyotishaChart,
@@ -17,4 +18,5 @@ import { buildCatalogue } from '../../lib/phalita/phala/catalogue-engine';
   buildDashaPhala,
   buildReading,
   buildCatalogue,
+  DOMAINS,
 };
