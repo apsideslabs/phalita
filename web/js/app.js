@@ -13,6 +13,8 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   };
 
+  var DAY = 86400000;
+
   function masthead(m) {
     var antar = m.antar ? ', with ' + esc(m.antar) + ' inside it' : '';
     return '<section class="rd-mast"><div class="narrow">' +
@@ -21,6 +23,56 @@
       '<p class="sub">janma rāśi, read from Phaladīpikā</p>' +
       '<p class="dasha">' + esc(m.dasha) + ' runs from ' + esc(m.start) +
       ' to ' + esc(m.end) + antar + '. ' + esc(m.note) + '</p>' +
+      '</div></section>';
+  }
+
+  /**
+   * Upcoming antardasha changes, in the reference's timeline idiom. Each entry
+   * carries the phala the text gives that lord, read for this chart.
+   */
+  function shifts(chart) {
+    var P = window.Phalita;
+    var tree = (chart.vimshottari && chart.vimshottari.tree) || [];
+    var now = Date.now();
+    var upcoming = [];
+
+    tree.forEach(function (maha) {
+      (maha.subPeriods || []).forEach(function (sub) {
+        var t = new Date(sub.startDate).getTime();
+        if (!isNaN(t) && t > now) upcoming.push({ maha: maha, sub: sub, t: t });
+      });
+    });
+    upcoming.sort(function (a, b) { return a.t - b.t; });
+    upcoming = upcoming.slice(0, 4);
+    if (!upcoming.length) return '';
+
+    var items = upcoming.map(function (u) {
+      var days = Math.round((u.t - now) / DAY);
+      var tone = days <= 7 ? 'orange' : days <= 30 ? 'blue' : 'grey';
+      var when = days <= 0 ? 'Today' : days === 1 ? 'Tomorrow' : 'In ' + days + ' days';
+      var date = new Date(u.t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      var phala = '';
+      try {
+        var d = P.buildDashaPhala(chart, new Date(u.t));
+        phala = d && d.statement ? d.statement.phala : (d && d.unstated) || '';
+      } catch (e) { phala = ''; }
+
+      return '<li class="tl-item">' +
+        '<span class="ring ' + tone + '"></span>' +
+        '<div class="tl-body">' +
+          '<div class="tl-meta"><span class="pill ' + tone + '">' + esc(when) + '</span>' +
+          '<span class="tl-date">' + esc(date) + '</span></div>' +
+          '<b>' + esc(u.sub.lordName) + ' antardaśā begins</b>' +
+          (phala ? '<p>' + esc(phala) + '</p>' : '') +
+        '</div></li>';
+    }).join('');
+
+    return '<section class="shifts"><div class="narrow">' +
+      '<h2>Period shifts</h2>' +
+      '<p class="cardsub">Upcoming antardaśā, read from Phaladīpikā 19</p>' +
+      '<ul class="tl">' + items + '</ul>' +
+      '<a class="tl-cta" href="#verses">View the daśā phala below</a>' +
       '</div></section>';
   }
 
@@ -79,7 +131,6 @@
     });
   }
 
-  /** Fields the landing page may hand over as query parameters. */
   var FIELDS = ['date', 'time', 'lat', 'lon', 'tz'];
 
   function prefill(form) {
@@ -124,11 +175,13 @@
       note: d.strength.note
     });
 
+    html += shifts(chart);
+
     html += '<div class="narrow">' +
       P.buildNarrative(chart).map(chapter).join('') +
       '</div>';
 
-    html += '<div class="narrow verses-wrap"><p class="kicker">From the verses</p>' +
+    html += '<div class="narrow verses-wrap" id="verses"><p class="kicker">From the verses</p>' +
       reading.sections.filter(function (s) { return s.id !== 'gochara'; }).map(section).join('') +
       '</div>';
 
@@ -160,7 +213,6 @@
     form.addEventListener('submit', function (ev) { ev.preventDefault(); run(); });
     run();
 
-    // Arriving from the landing page, drop the reader at the reading itself.
     if (fromHome) {
       var target = out.getBoundingClientRect().top + window.scrollY - 20;
       window.scrollTo({ top: target, behavior: 'smooth' });
