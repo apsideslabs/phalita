@@ -7,6 +7,20 @@
 <meta name="description" content="Ten chapters on your life, drawn from Phaladīpikā verse by verse. Every line is a condition the text states, tested against your chart." />
 <link rel="stylesheet" href="./css/style.css" />
 <link rel="stylesheet" href="./css/home.css" />
+<style>
+.adv { margin-top: 0.6rem; }
+.adv summary {
+  cursor: pointer; font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; color: #9a9a9a;
+  list-style: none; padding: 0.35rem 0;
+}
+.adv summary::-webkit-details-marker { display: none; }
+.adv summary::after { content: ' ▾'; color: #c4c4c4; }
+.adv[open] summary::after { content: ' ▴'; }
+.adv summary:hover { color: var(--maroon-deep); }
+.advnote { margin: 0.5rem 0 0; font-size: 0.74rem; line-height: 1.55; color: #9a9a9a; }
+.bform label.wide, .vform label.wide { flex: 1 1 100%; }
+</style>
 </head>
 <body>
 
@@ -44,23 +58,31 @@
     </p>
 
     <form class="vform" id="quick" action="./reading.html" method="get">
+      <div class="frow">
+        <label class="wide"><span>Place of birth</span>
+          <input type="text" id="place" name="place" list="placelist" placeholder="Start typing a city…" autocomplete="off" value="Guwahati, Assam" />
+          <datalist id="placelist"></datalist>
+        </label>
+      </div>
       <div class="frow two">
         <label><span>Date of birth</span><input type="date" name="date" value="1990-08-15" required /></label>
         <label><span>Time of birth</span><input type="time" name="time" value="06:45" required /></label>
       </div>
-      <div class="frow two">
-        <label><span>Latitude</span><input type="number" name="lat" step="0.0001" value="26.1844" required /></label>
-        <label><span>Longitude</span><input type="number" name="lon" step="0.0001" value="91.7458" required /></label>
-      </div>
-      <div class="frow">
-        <label><span>UTC offset</span><input type="number" name="tz" step="0.25" value="5.5" required /></label>
-      </div>
+      <details class="adv">
+        <summary>Coordinates, if the place is not listed</summary>
+        <div class="frow three">
+          <label><span>Latitude</span><input type="number" name="lat" step="0.0001" value="26.1445" required /></label>
+          <label><span>Longitude</span><input type="number" name="lon" step="0.0001" value="91.7362" required /></label>
+          <label><span>UTC offset</span><input type="number" name="tz" step="0.25" value="5.5" required /></label>
+        </div>
+        <p class="advnote">Offsets are standard time. India has no daylight saving; some countries do.</p>
+      </details>
       <button type="submit">Read My Kundli</button>
     </form>
 
     <div class="chips">
       <a href="./reading.html"><span class="ic">🗓</span> Today's reading</a>
-      <a href="./reading.html"><span class="ic">♡</span> Match making</a>
+      <a href="./questions.html"><span class="ic">♡</span> Ask the chart</a>
       <a href="./sources.html"><span class="ic">💬</span> How it works</a>
     </div>
   </div>
@@ -249,5 +271,6 @@
   </div>
 </footer>
 
+<script src="./js/place.js"></script>
 </body>
 </html>
