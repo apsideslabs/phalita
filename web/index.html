@@ -6,6 +6,7 @@
 <title>Phalita — a reading of your birth chart</title>
 <meta name="description" content="Ten chapters on your life, drawn from Phaladīpikā verse by verse. Every line is a condition the text states, tested against your chart." />
 <link rel="stylesheet" href="./css/style.css" />
+<link rel="stylesheet" href="./css/home.css" />
 </head>
 <body>
 
@@ -22,90 +23,144 @@
   </div>
 </header>
 
-<section class="hero">
+<section class="hero2">
+  <div class="grid2">
+    <div class="copy">
+      <p class="kicker">फल · phala · the fruit of the chart</p>
+      <h1>Your chart, read the way an <em>astrologer</em> reads it.</h1>
+      <p class="lede">
+        Ten chapters on your life — work, money, marriage, children, home, body,
+        mind, fortune, family and dharma. Every line is a condition Phaladīpikā
+        states, tested against your chart, and every line carries its verse.
+      </p>
+      <ul class="marks">
+        <li>91 verses transcribed</li>
+        <li>Checked against the 1950 print</li>
+        <li>No death date, ever</li>
+      </ul>
+    </div>
+
+    <form class="hero-form" id="quick" action="./reading.html" method="get">
+      <h2>Read your chart</h2>
+      <p class="tiny">Takes about a minute. Nothing is stored.</p>
+
+      <div class="frow">
+        <label><span>Date</span><input type="date" name="date" value="1990-08-15" required /></label>
+        <label><span>Time</span><input type="time" name="time" value="06:45" required /></label>
+      </div>
+      <div class="frow">
+        <label><span>Latitude</span><input type="number" name="lat" step="0.0001" value="26.1844" required /></label>
+        <label><span>Longitude</span><input type="number" name="lon" step="0.0001" value="91.7458" required /></label>
+      </div>
+      <div class="frow one">
+        <label><span>UTC offset</span><input type="number" name="tz" step="0.25" value="5.5" required /></label>
+      </div>
+
+      <button type="submit">Read the chart →</button>
+      <p class="note">Computed in your browser. Nothing leaves it.</p>
+    </form>
+  </div>
+</section>
+
+<div class="strip">
   <div class="inner">
-    <p class="kicker">फल · phala · the fruit of the chart</p>
-    <h1>Your chart, read the way an <em>astrologer</em> reads it.</h1>
-    <p class="lede">
-      Ten chapters on your life — work, money, marriage, children, home, body, mind,
-      fortune, family and dharma. Every line is a condition Phaladīpikā states, tested
-      against your chart, and every line carries the verse it came from.
-    </p>
-    <div class="actions">
-      <a class="btn primary" href="./reading.html">Read your chart →</a>
-      <a class="btn ghost" href="#sample">See a sample chapter</a>
-    </div>
+    <a href="#chapters">Work</a><a href="#chapters">Money</a><a href="#chapters">Marriage</a>
+    <a href="#chapters">Children</a><a href="#chapters">Home</a><a href="#chapters">Body</a>
+    <a href="#chapters">Mind</a><a href="#chapters">Fortune</a><a href="#chapters">Family</a>
+    <a href="#chapters">Dharma</a>
+  </div>
+</div>
 
-    <div class="stats">
-      <div><b>91</b><span>verses transcribed</span></div>
-      <div><b>250</b><span>questions answered</span></div>
-      <div><b>10</b><span>chapters of prose</span></div>
-      <div><b>0</b><span>death dates, ever</span></div>
+<section class="feature" id="chapters">
+  <div class="inner">
+    <div class="copy">
+      <p class="kicker">The reading</p>
+      <h2>Ten chapters, written rather than tabulated</h2>
+      <p>Most engines hand you a list of placements and leave you to work out what they mean. This one commits to a judgement and says it in a sentence.</p>
+      <ul>
+        <li>Work and standing — the tenth, sixth and eleventh</li>
+        <li>Money — the second and eleventh</li>
+        <li>Marriage and partnership — the seventh and second</li>
+        <li>Children and creative work — the fifth and ninth</li>
+        <li>Home, body, mind, fortune, family, dharma</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="ptitle"><b>Money</b><i>the second and eleventh</i></div>
+      <p>Money is one of the well-placed parts of this chart. It accumulates, and it accumulates from things you already hold rather than from windfalls.</p>
+      <p>You keep what you earn; your word carries weight in money matters and you see a financial situation before others do.</p>
+      <p>The leak is worth naming anyway. Money leaves through obligations rather than through spending.</p>
+      <p>This chapter is most active during the Jupiter period, 2020 to 2036.</p>
     </div>
   </div>
 </section>
 
-<section class="section" id="chapters">
-  <div class="wrap">
-    <div class="rule"></div>
-    <h2>Ten chapters, one for each part of a life</h2>
-    <p class="sub">Each chapter is written from the houses that govern it, and says what the chart gives, what it costs, when it activates, and what to do about it.</p>
-
-    <div class="grid two">
-      <div class="card"><h3>Work and standing</h3><span class="houses">the tenth, sixth and eleventh</span><p>What you do in public, how far it carries you, and whether the chart points to service or to your own enterprise.</p></div>
-      <div class="card"><h3>Money</h3><span class="houses">the second and eleventh</span><p>What comes in, what stays, where the leak is — and whether the chart rewards a big bet or a slow build.</p></div>
-      <div class="card"><h3>Marriage and partnership</h3><span class="houses">the seventh and second</span><p>Whether the bond settles or strains, and whether the chart reads a love match or an arranged one.</p></div>
-      <div class="card"><h3>Children and creative work</h3><span class="houses">the fifth and ninth</span><p>What you bring into the world and pass on — children, students, or the work you make rather than the work you do.</p></div>
-      <div class="card"><h3>Home and property</h3><span class="houses">the fourth</span><p>The ground you stand on: property, vehicles, domestic peace, and whether they accumulate or have to be built.</p></div>
-      <div class="card"><h3>Body and health</h3><span class="houses">the first and sixth</span><p>Constitution and recovery, the recurring weak point, and how much of your energy has to be managed rather than spent.</p></div>
-      <div class="card"><h3>Mind and temperament</h3><span class="houses">the first, fourth and fifth</span><p>How you think under pressure, where the restlessness comes from, and what steadies it.</p></div>
-      <div class="card"><h3>Fortune and support</h3><span class="houses">the ninth and eleventh</span><p>Help that arrives from outside your own effort — teachers, elders, and the doors that open without pushing.</p></div>
-      <div class="card"><h3>Family and siblings</h3><span class="houses">the third and fourth</span><p>The people you came from, and whether they carry you or whether you build your own ground.</p></div>
-      <div class="card"><h3>Dharma and inward life</h3><span class="houses">the ninth and twelfth</span><p>The pull towards what lies behind things, and whether solitude rests you or costs you.</p></div>
+<section class="feature alt flip">
+  <div class="inner">
+    <div class="copy">
+      <p class="kicker">Provenance</p>
+      <h2>Every sentence opens onto its verse</h2>
+      <p>Under each statement sits the citation. Open it and you get the Devanagari and the chapter-and-verse. Where a citation could not be checked against a printed edition, the platform says so instead of implying authority it does not have.</p>
+      <ul>
+        <li>91 verses across eight chapters of Phaladīpikā</li>
+        <li>Checked page by page against the 1950 printed edition</li>
+        <li>Textual disputes kept as disputes, not resolved quietly</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="ptitle"><b>Phaladīpikā 10.15</b><i>adhyāya 10 · śloka 15</i></div>
+      <p class="mula" style="font-size:0.95rem;line-height:2;">कलत्रनाथे रिपुनीचसंस्थे मूढेऽथवा पापनिरीक्षिते वा ।<br />कलत्रभे पापयुतेऽथ दृष्टे कलत्रहानीं प्रवदन्ति सन्तः ॥</p>
+      <p style="margin-top:0.9rem;font-size:0.82rem;color:var(--ink-faint);">The verse names a configuration, not a single clause — which is why the engine withholds it when only one condition holds.</p>
     </div>
   </div>
 </section>
 
-<section class="section alt" id="sample">
-  <div class="wrap">
-    <div class="rule"></div>
-    <h2>This is what a chapter reads like</h2>
-    <p class="sub">Real engine output, not a mock-up.</p>
-
-    <div class="sample">
-      <p class="title">Money <span>the second and eleventh</span></p>
-      <p class="body">Money is one of the well-placed parts of this chart. It accumulates, and it accumulates from things you already hold rather than from windfalls.</p>
-      <p class="body">You keep what you earn; your word carries weight in money matters and you see a financial situation before others do.</p>
-      <p class="body">The leak is worth naming anyway. Money leaves through obligations rather than through spending, and family resources do not back you when you need them.</p>
-      <p class="body">This chapter is most active during the Jupiter period, 2020 to 2036 — that is when what it describes is most likely to be happening.</p>
-      <p class="body">Build slowly and keep what you build. This is not a chart that rewards a big bet.</p>
-      <p class="note">Every sentence above resolves to a verse. Open the reading and each chapter carries its Devanagari and its chapter-and-verse.</p>
+<section class="feature">
+  <div class="inner">
+    <div class="copy">
+      <p class="kicker">Method</p>
+      <h2>Four steps, and no guessing between them</h2>
+      <p>Nothing in the reading is produced by a model improvising. Every line traces back to a condition the text states and the engine tests.</p>
+      <ul>
+        <li>Birth data in — date, time, place</li>
+        <li>Sidereal chart computed: positions, houses, dignities, strengths, daśā</li>
+        <li>Every rule tested; a rule that cannot fire is not in the corpus</li>
+        <li>What fires becomes prose, with its period attached</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="ptitle"><b>What it will not do</b><i>by design</i></div>
+      <div class="line"><span>death date</span><b>never</b></div>
+      <div class="line"><span>verdict from one condition</span><b>withheld</b></div>
+      <div class="line"><span>chart drawing</span><b>not this platform</b></div>
+      <div class="line"><span>fabricated citation</span><b>panel withdrawn</b></div>
     </div>
   </div>
 </section>
 
-<section class="section">
-  <div class="wrap">
-    <div class="rule"></div>
-    <h2>Four steps, no guessing</h2>
-    <div class="grid three">
-      <div class="card"><span class="num">1</span><h3>Birth data</h3><p>Date, time and place. Nothing else is asked for.</p></div>
-      <div class="card"><span class="num">2</span><h3>The chart</h3><p>Sidereal positions, houses, dignities, strengths and the running daśā are computed from the ephemeris.</p></div>
-      <div class="card"><span class="num">3</span><h3>Conditions tested</h3><p>Every rule the text states is tested against that chart. A rule that cannot fire is not in the corpus.</p></div>
-      <div class="card"><span class="num">4</span><h3>Written out</h3><p>What fires becomes prose. What contradicts itself is shown as contradicting itself, not quietly resolved.</p></div>
-    </div>
-  </div>
-</section>
+<section class="faq">
+  <div class="inner">
+    <h2>Questions</h2>
 
-<section class="section alt">
-  <div class="wrap">
-    <div class="rule"></div>
-    <h2>What it will not do</h2>
-    <div class="grid three">
-      <div class="card"><h3>No death date</h3><p>The classical arithmetic is disputed by the tradition itself. 22.24 records that Bhadanta rejected the piṇḍāyu and Varāhamihira agreed. A figure from a disputed method is worse than none.</p></div>
-      <div class="card"><h3>No verdict from one condition</h3><p>Phaladīpikā 15.6 states that two or three conditions must agree before a severe loss is declared. Where they do not, the engine says it is withholding the reading.</p></div>
-      <div class="card"><h3>No chart drawing</h3><p>That is what a calculation platform is for. This one answers in words.</p></div>
-    </div>
+    <details open>
+      <summary>Why is there no death date?</summary>
+      <p>The classical longevity arithmetic is disputed by the tradition itself. Phaladīpikā 22.24 records that Bhadanta rejected the piṇḍāyu as unsound, and that Varāhamihira said the same. The haraṇa reductions are therefore not computed. A figure from a disputed method would be worse than no figure.</p>
+    </details>
+
+    <details>
+      <summary>Why does it sometimes refuse to answer?</summary>
+      <p>Phaladīpikā 15.6 states that two or three conditions must agree before a severe loss is declared. Where they do not, the engine withholds the reading and says that it is withholding it. That is the text's instruction, not caution layered over it.</p>
+    </details>
+
+    <details>
+      <summary>Where do the verses come from?</summary>
+      <p>Ninety-one verses of Phaladīpikā across chapters 6, 7, 9, 10, 16, 19, 22 and 26, checked against Mantreśvara, <em>Phaladeepika</em>, translated by P. V. Subrahmanya Sastri, second edition, Munshiram Manoharlal, Delhi, 1950.</p>
+    </details>
+
+    <details>
+      <summary>Is my birth data stored?</summary>
+      <p>No. The chart is computed in your browser and never sent anywhere. There is no account, no database and no server-side calculation.</p>
+    </details>
   </div>
 </section>
 
@@ -129,13 +184,17 @@
       <div>
         <h4>Reading</h4>
         <a href="./reading.html">Your chart</a>
-        <a href="./index.html#chapters">The ten chapters</a>
-        <a href="./index.html#sample">A sample</a>
+        <a href="#chapters">The ten chapters</a>
       </div>
       <div>
         <h4>About</h4>
         <a href="./about.html">What this is</a>
         <a href="./sources.html">Sources</a>
+      </div>
+      <div>
+        <h4>Method</h4>
+        <a href="./about.html">The two rules</a>
+        <a href="#faq">Questions</a>
       </div>
     </div>
   </div>
