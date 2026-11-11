@@ -1,78 +1,132 @@
 'use client';
 
 /**
- * PHALITA — the twelve-domain panel, retired.
+ * PHALITA — the twelve-domain reading.
  *
- * This component used to render 23 "canonical rules" from
- * lib/jyotisha/indications/classical-sources.ts, each with a Sanskrit sloka and
- * a chapter-and-verse attribution. The attributions did not survive audit
- * against the primary text:
+ * This panel once rendered 23 rules whose Sanskrit attributions did not survive
+ * audit; it was retired rather than left standing with a disclaimer. It now
+ * renders the same twelve sectors from the verified rule layer: every line is a
+ * condition of Phaladīpikā tested against this chart, naming the graha, its
+ * sign and its house.
  *
- *   The first rule cited Phaladīpikā "Ch. 14 (Dehasaukhyādi Phala), Śloka 1–3"
- *   and quoted लग्ने लग्नपतौ वाऽपि केन्द्रत्रिकोणगे बलयुते… . Chapter 14 of
- *   Phaladīpikā is रोगनिर्णयः — the chapter on diagnosing disease — and its
- *   first verse reads रोगनिर्णय रोगस्य चिन्तामपि… . The quoted śloka is not in
- *   that chapter, and the chapter title given for it does not exist.
- *
- * One fabricated citation removes the only reason to trust the other
- * twenty-two, so the panel is retired rather than left standing with a
- * disclaimer. The sectors it covered are now read from Phaladīpikā 16, verse by
- * verse, in the Reading tab.
- *
- * The rule file itself is left in the repository as the record of what was
- * removed. Restoring any of those rules requires finding its verse in a primary
- * text first — see SOURCES.md.
+ * Nothing here is a citation restated. If a sector has no finding, it says so.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { JyotishaChart } from '@/lib/jyotisha/types';
-import { AlertTriangle, ArrowRight, BookOpen } from 'lucide-react';
+import { readBhavas } from '@/lib/phalita/phala/rules';
+import { BookOpen } from 'lucide-react';
 
 interface IndicationsPanelProps {
   chart: JyotishaChart;
   focusDomainId?: string;
+  /** Kept so the workspace still compiles; this panel has one view. */
   initialViewMode?: string;
 }
 
-export const IndicationsPanel: React.FC<IndicationsPanelProps> = () => {
+interface Domain {
+  id: string;
+  title: string;
+  bhavas: number[];
+}
+
+const DOMAINS: Domain[] = [
+  { id: 'career', title: 'Career and standing', bhavas: [10, 6, 11] },
+  { id: 'wealth', title: 'Wealth and income', bhavas: [2, 11] },
+  { id: 'education', title: 'Education and learning', bhavas: [4, 5, 9] },
+  { id: 'health', title: 'Body and health', bhavas: [1, 6] },
+  { id: 'marriage', title: 'Marriage and partnership', bhavas: [7, 2] },
+  { id: 'children', title: 'Children and progeny', bhavas: [5, 9] },
+  { id: 'property', title: 'Home and property', bhavas: [4] },
+  { id: 'fortune', title: 'Fortune and father', bhavas: [9] },
+  { id: 'siblings', title: 'Siblings and courage', bhavas: [3] },
+  { id: 'opposition', title: 'Debts and opposition', bhavas: [6] },
+  { id: 'spirit', title: 'Dharma and renunciation', bhavas: [9, 12] },
+  { id: 'travel', title: 'Travel and foreign life', bhavas: [12, 3, 9] },
+];
+
+const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
+export const IndicationsPanel: React.FC<IndicationsPanelProps> = ({ chart, focusDomainId }) => {
+  const shown = useMemo(
+    () => (focusDomainId ? DOMAINS.filter((d) => d.id === focusDomainId) : DOMAINS),
+    [focusDomainId]
+  );
+
+  const read = useMemo(
+    () =>
+      shown.map((d) => {
+        const findings = readBhavas(chart, d.bhavas);
+        const good = findings.filter((f) => f.side === 'a').sort((a, b) => b.weight - a.weight);
+        const bad = findings.filter((f) => f.side === 'b').sort((a, b) => b.weight - a.weight);
+        const pos = good.reduce((s, f) => s + f.weight, 0);
+        const neg = bad.reduce((s, f) => s + f.weight, 0);
+        const verdict = pos > neg * 1.3 ? 'Held' : neg > pos * 1.3 ? 'Strained' : 'Mixed';
+        return { domain: d, good: good.slice(0, 2), bad: bad.slice(0, 2), verdict };
+      }),
+    [chart, shown]
+  );
+
   return (
-    <div id="indications-panel-retired" className="space-y-4">
-      <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6">
-        <div className="flex items-start gap-3">
-          <span className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-4 h-4" />
-          </span>
-          <div>
-            <h2 className="font-serif font-bold text-lg text-slate-900">
-              This panel has been retired
-            </h2>
-            <p className="mt-2 text-sm text-slate-700 leading-relaxed max-w-2xl">
-              The twelve-domain reading that lived here was built on 23 rules whose
-              Sanskrit citations did not survive checking against the primary text. The
-              first cited Phaladīpikā chapter 14 for a verse that is not in it — chapter
-              14 is <span className="font-serif">रोगनिर्णयः</span>, on diagnosing disease.
-              Rather than show scripture it cannot vouch for, the platform withdraws the
-              panel.
-            </p>
-            <p className="mt-3 text-sm text-slate-700 leading-relaxed max-w-2xl">
-              The sectors it claimed — career, wealth, education, health, marriage — are
-              now read from Phaladīpikā 16 in the Reading tab, where every statement
-              resolves to a transcribed verse you can open in Devanagari.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <a
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#8C2D19] text-white text-xs font-semibold"
+    <div className="space-y-4">
+      <div className="flex items-start gap-2.5">
+        <span className="w-8 h-8 rounded-lg bg-[#8C2D19]/10 text-[#8C2D19] flex items-center justify-center shrink-0">
+          <BookOpen className="w-4 h-4" />
+        </span>
+        <div>
+          <h3 className="font-serif font-bold text-base text-slate-900">The twelve domains</h3>
+          <p className="text-[11px] text-slate-600 leading-relaxed max-w-3xl mt-0.5">
+            Each sector is read from the bhāvas that govern it, counted from the sector itself as
+            well as from the lagna, with its lord and its kāraka weighed together. Every line names
+            the graha, its sign and its house.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {read.map(({ domain, good, bad, verdict }) => (
+          <div key={domain.id} className="bg-white rounded-2xl border border-slate-200/90 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <h4 className="font-serif font-bold text-[13px] text-slate-900">{domain.title}</h4>
+              <span
+                className={`px-1.5 py-0.5 rounded border text-[9px] font-mono uppercase tracking-wider ${
+                  verdict === 'Held'
+                    ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                    : verdict === 'Strained'
+                    ? 'bg-rose-50 text-rose-900 border-rose-200'
+                    : 'bg-amber-50 text-amber-900 border-amber-200'
+                }`}
               >
-                Open the Reading tab <ArrowRight className="w-3.5 h-3.5" />
-              </a>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-600">
-                <BookOpen className="w-3.5 h-3.5" /> See SOURCES.md for the audit
+                {verdict}
               </span>
             </div>
+
+            {good.length === 0 && bad.length === 0 ? (
+              <p className="mt-2 text-[11.5px] text-slate-500">
+                No condition of the text bears on this sector in this chart.
+              </p>
+            ) : (
+              <ul className="mt-2 space-y-1">
+                {good.map((f, i) => (
+                  <li key={`g${i}`} className="flex items-start gap-1.5 text-[11.5px] leading-snug text-slate-700">
+                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                    <span>{cap(f.text)}</span>
+                  </li>
+                ))}
+                {bad.map((f, i) => (
+                  <li key={`b${i}`} className="flex items-start gap-1.5 text-[11.5px] leading-snug text-slate-700">
+                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
+                    <span>{cap(f.text)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <p className="mt-2 text-[10px] font-mono text-slate-400">
+              bhāvas {domain.bhavas.join(', ')}
+            </p>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );

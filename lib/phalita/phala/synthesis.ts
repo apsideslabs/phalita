@@ -54,23 +54,27 @@ function verdict(
   aScore: number,
   bScore: number,
   a: string,
-  b: string
+  b: string,
+  factors: SynthesisFactor[]
 ): { answer: string; confidence: 'clear' | 'leaning' | 'mixed' } {
   const margin = Math.abs(aScore - bScore);
+  const winning = aScore >= bScore ? 'a' : 'b';
   const lead = aScore >= bScore ? a : b;
+  const win = factors.filter((f) => f.side === winning).slice(0, 2).map((f) => f.label);
+  const lose = factors.filter((f) => f.side !== winning).slice(0, 1).map((f) => f.label);
+  const because = win.length ? ` ${win.join('; ')}.` : '';
+  const against = lose.length ? ` Against it: ${lose[0]}.` : '';
+
   if (margin < 2) {
     return {
-      answer: `Mixed. The chart does not settle this — it reads almost evenly between ${a} and ${b}, and the choice is likely to be made by circumstance rather than by nature.`,
+      answer: `Close to even — ${a.toLowerCase()} and ${b.toLowerCase()} are almost balanced here.${because}${against} The chart does not settle it.`,
       confidence: 'mixed',
     };
   }
   if (margin < 5) {
-    return {
-      answer: `It leans towards ${lead}. The indications are not one-sided, but the balance sits there.`,
-      confidence: 'leaning',
-    };
+    return { answer: `${lead}.${because}${against}`, confidence: 'leaning' };
   }
-  return { answer: `${lead} — and clearly so.`, confidence: 'clear' };
+  return { answer: `${lead}, and clearly so.${because}${against}`, confidence: 'clear' };
 }
 
 /** Employment or enterprise. */
@@ -167,7 +171,7 @@ export function careerMode(chart: JyotishaChart): Synthesis {
     factors.push({ label: 'lord of wealth weak — little capital of your own to risk', side: 'a', weight: 1, ground: 'Phaladīpikā 16.5' });
   }
 
-  const v = verdict(service, enterprise, 'Employment', 'Enterprise');
+  const v = verdict(service, enterprise, 'Employment', 'Enterprise', factors);
   return {
     id: 'career-mode',
     question: 'Employment or your own enterprise?',
@@ -238,7 +242,7 @@ export function marriageMode(chart: JyotishaChart): Synthesis {
     factors.push({ label: 'a malefic in the seventh — the match is constrained rather than chosen', side: 'b', weight: 1, ground: 'Phaladīpikā 10.15' });
   }
 
-  const v = verdict(love, arranged, 'A love match', 'An arranged match');
+  const v = verdict(love, arranged, 'A love match', 'An arranged match', factors);
   return {
     id: 'marriage-mode',
     question: 'Love match or arranged?',
