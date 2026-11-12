@@ -1,4 +1,4 @@
-/* PHALITA — the domain page. A list of domains, then one domain's questions. */
+/* PHALITA — the domain page. Tiles, then a reading. */
 
 .ask {
   padding: 2.5rem 0 1.2rem;
@@ -29,13 +29,13 @@
   align-items: start; text-align: left; cursor: pointer;
   padding: 1rem 1.05rem; border-radius: 14px;
   background: #fff; border: 1px solid #f0e6d8;
-  box-shadow: 0 1px 2px rgba(60,40,20,0.04), 0 10px 22px -18px rgba(60,40,20,0.32);
+  box-shadow: var(--edge), 0 1px 2px rgba(60,40,20,0.04), 0 10px 22px -18px rgba(60,40,20,0.32);
   font-family: var(--sans);
   transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .dtile:hover {
   transform: translateY(-1px); border-color: #e6cfae;
-  box-shadow: 0 2px 6px rgba(60,40,20,0.06), 0 16px 30px -20px rgba(60,40,20,0.38);
+  box-shadow: var(--edge), 0 2px 6px rgba(60,40,20,0.06), 0 16px 30px -20px rgba(60,40,20,0.38);
 }
 .dtile .dnum {
   grid-row: 1 / 3; align-self: center;
@@ -53,7 +53,7 @@
   text-transform: uppercase; color: #a8a8a8;
 }
 
-/* ---- one domain ---- */
+/* ---- the domain reading ---- */
 
 .dback {
   margin-top: 1.6rem; padding: 0.45rem 0.85rem; cursor: pointer;
@@ -62,24 +62,85 @@
 }
 .dback:hover { border-color: var(--maroon); color: var(--maroon-deep); }
 
-.dtitle {
-  margin: 1rem 0 0; font-family: var(--sans); font-weight: 800;
-  font-size: clamp(1.35rem, 4.4vw, 1.7rem); letter-spacing: -0.03em; line-height: 1.15; color: #141414;
+.rep { margin-top: 1.1rem; }
+.rkicker {
+  margin: 0; font-size: 0.62rem; font-weight: 800;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--maroon-deep);
 }
-.dsub {
-  margin: 0.35rem 0 0; font-family: var(--serif); font-style: italic;
-  font-size: 0.88rem; color: #9a9a9a;
+.dtitle {
+  margin: 0.5rem 0 0; font-family: var(--sans); font-weight: 800;
+  font-size: clamp(1.45rem, 5vw, 1.9rem); letter-spacing: -0.035em;
+  line-height: 1.12; color: #141414; text-wrap: balance;
 }
 
-.dlist { margin-top: 1.2rem; }
+/* verdict band */
+.vband {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem;
+  margin-top: 1rem; padding: 0.75rem 0.9rem; border-radius: 13px;
+  background: #fff; border: 1px solid var(--rule);
+  box-shadow: var(--edge), 0 1px 2px rgba(60,40,20,0.04);
+}
+.vpill {
+  padding: 0.24rem 0.65rem; border-radius: 999px;
+  font-size: 0.66rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.vband.held .vpill { background: #e8f3ec; color: #2f6b4f; }
+.vband.mixed .vpill { background: #fdf3e2; color: #8a6316; }
+.vband.strained .vpill { background: #fdeeea; color: #9a3b2c; }
+.vmeta { font-size: 0.84rem; color: #5c5c5c; }
+.vscore {
+  margin-left: auto; font-family: var(--mono); font-size: 0.74rem; color: #a8a8a8;
+}
+
+.vlead {
+  margin: 1rem 0 0; font-family: var(--serif); font-size: 1.02rem;
+  line-height: 1.75; color: #3a3a3a;
+}
+
+/* evidence */
+.fhead {
+  margin: 1.6rem 0 0; font-size: 0.6rem; font-weight: 800;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint);
+}
+.facts { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+.fact {
+  position: relative; display: flex; flex-wrap: wrap; align-items: baseline;
+  gap: 0.5rem; padding: 0.6rem 0 0.6rem 1.15rem;
+  border-bottom: 1px solid var(--rule);
+}
+.fact:last-child { border-bottom: 0; }
+.fact::before {
+  content: ''; position: absolute; left: 0; top: 1rem;
+  width: 0.42rem; height: 0.42rem; border-radius: 999px;
+}
+.fact.pos::before { background: #6fae86; }
+.fact.neg::before { background: #d08a7c; }
+.flabel { flex: 1 1 60%; font-size: 0.9rem; line-height: 1.6; color: #3a3a3a; }
+.fground {
+  flex: 0 0 auto; font-family: var(--mono); font-size: 0.64rem;
+  color: #b0a89c; letter-spacing: 0.02em;
+}
+
+/* the questions, folded away */
+.qsec { margin-top: 1.8rem; border-top: 1px solid var(--rule); padding-top: 1rem; }
+.qsec > summary {
+  cursor: pointer; list-style: none; font-size: 0.7rem; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft);
+}
+.qsec > summary::-webkit-details-marker { display: none; }
+.qsec > summary::after { content: ' +'; color: var(--maroon); }
+.qsec[open] > summary::after { content: ' \2013'; }
+.qsec > summary:hover { color: var(--maroon-deep); }
+
+.dlist { margin-top: 1rem; }
 details.dq {
   background: #fff; border: 1px solid transparent; border-radius: 14px;
-  margin-bottom: 0.55rem;
-  box-shadow: 0 1px 2px rgba(60,40,20,0.04), 0 8px 20px -18px rgba(60,40,20,0.3);
+  margin-bottom: 0.5rem;
+  box-shadow: var(--edge), 0 1px 2px rgba(60,40,20,0.04), 0 8px 20px -18px rgba(60,40,20,0.3);
 }
 details.dq summary {
-  cursor: pointer; list-style: none; padding: 0.95rem 1.05rem;
-  font-size: 0.9rem; font-weight: 700; line-height: 1.4; color: #2a2a2a;
+  cursor: pointer; list-style: none; padding: 0.9rem 1.05rem;
+  font-size: 0.89rem; font-weight: 600; line-height: 1.45; color: #2a2a2a;
   display: flex; justify-content: space-between; gap: 0.8rem;
 }
 details.dq summary::-webkit-details-marker { display: none; }
@@ -89,22 +150,10 @@ details.dq summary::after {
 }
 details.dq[open] summary::after { content: '\2013'; }
 details.dq[open] summary { border-bottom: 1px solid var(--rule); }
-
 .danswer {
-  margin: 0; padding: 0.95rem 1.05rem 0.2rem;
+  margin: 0; padding: 0.95rem 1.05rem;
   font-size: 0.92rem; line-height: 1.75; color: #4a4a4a;
 }
-.qf { list-style: none; margin: 0.7rem 0 0; padding: 0 1.05rem 1rem; }
-.qf li {
-  position: relative; padding-left: 1.1rem; margin-bottom: 0.3rem;
-  font-size: 0.8rem; line-height: 1.5; color: #8a8a8a;
-}
-.qf li::before {
-  content: ''; position: absolute; left: 0; top: 0.4rem;
-  width: 0.38rem; height: 0.38rem; border-radius: 999px;
-}
-.qf li.pos::before { background: #6fae86; }
-.qf li.neg::before { background: #d08a7c; }
 
 .hintline {
   margin: 1.6rem 0 0; font-family: var(--serif); font-style: italic;
@@ -114,4 +163,5 @@ details.dq[open] summary { border-bottom: 1px solid var(--rule); }
 @media (max-width: 560px) {
   .ask { padding: 2rem 0 1rem; }
   .dgrid { grid-template-columns: 1fr; }
+  .vscore { display: none; }
 }
