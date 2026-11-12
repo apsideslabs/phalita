@@ -18,13 +18,24 @@ import type { Question, QFactor } from './questions';
 import { DOMAINS, NOTES, QUESTIONS, ROWS } from './catalogue';
 import { readBhavas } from './rules';
 
-export function buildCatalogue(chart: JyotishaChart): Question[] {
+/**
+ * Build catalogue answers.
+ *
+ * Pass `onlyDomain` to evaluate a single domain: the filter runs before any
+ * rule is evaluated, so a domain page builds its ten answers rather than all
+ * 250. Without it, the whole catalogue is built.
+ */
+export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Question[] {
   const out: Question[] = [];
 
   ROWS.forEach((row, i) => {
     const [id, domIdx, noteIdx, bhavas, sev] = row;
     const question = QUESTIONS[i];
     const domain = DOMAINS[domIdx] ?? 'General';
+
+    // Skip before doing any work: no reading, no scoring, no allocation.
+    if (onlyDomain && domain !== onlyDomain) return;
+
     const note = NOTES[noteIdx] ?? '';
 
     const findings = readBhavas(chart, bhavas);
