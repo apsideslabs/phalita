@@ -1,9 +1,9 @@
 /**
  * PHALITA — verification before prediction.
  *
- * Five statements drawn from Bṛhat Jātaka ch. 5, banded by the native's age.
- * The person answers Correct or Wrong; if most are correct the chart stands,
- * and if not the page says the birth data is what to doubt.
+ * Statements from Bṛhat Jātaka chapters 5 and 20, banded by the native's age.
+ * Ch. 5 gives birth circumstances a parent confirms; ch. 20 gives body and
+ * temper the person confirms themselves.
  *
  * A statement outside the age band is never generated, so a child cannot be
  * asked about a marriage.
@@ -18,7 +18,6 @@
   var E = function (s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   };
-  var cap = function (s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; };
 
   function ageOf(birth) {
     if (!birth || !birth.year) return null;
@@ -39,8 +38,7 @@
 
   /** Malefics in the 4th or 7th from the Moon. BJ 5.17. */
   function maleficsFromMoon(c) {
-    var moon = c.planets.moon.house;
-    var hits = [];
+    var moon = c.planets.moon.house, hits = [];
     MAL.forEach(function (p) {
       var h = c.planets[p] && c.planets[p].house;
       if (!h) return;
@@ -90,6 +88,35 @@
     return null;
   }
 
+  /**
+   * Bṛhat Jātaka ch. 20 — what the Sun in each house gives the body and temper.
+   * These are the most checkable statements available: a person knows whether
+   * they wear spectacles, and a wrong claim there is decisive.
+   */
+  function bodyChecks(c) {
+    var out = [];
+    var h = c.planets.sun && c.planets.sun.house;
+    if (h === 1 || h === 8) {
+      out.push({ claim: 'Your eyesight has needed correcting — spectacles, lenses, or a complaint with your eyes.', v: 'Bṛhat Jātaka 20.1 / 20.3 — the Sun in the first or eighth gives defective vision' });
+    }
+    if (h === 2) {
+      out.push({ claim: 'You have had trouble with your teeth, mouth or face — an extraction, an injury, or something recurring.', v: 'Bṛhat Jātaka 20.1 — Sun in the second, disease of the face' });
+    }
+    if (h === 4) {
+      out.push({ claim: 'Settling at home has not come easily to you — comfort has been hard to hold on to.', v: 'Bṛhat Jātaka 20.2 — Sun in the fourth, without comfort' });
+    }
+    if (h === 6) {
+      out.push({ claim: 'You handle opponents well — in a confrontation you more often come out ahead than behind.', v: 'Bṛhat Jātaka 20.2 — Sun in the sixth, conqueror of enemies' });
+    }
+    if (h === 7) {
+      out.push({ claim: 'A close relationship has humbled you at some point — you came off worse in it.', v: 'Bṛhat Jātaka 20.3 — Sun in the seventh' });
+    }
+    if (h === 12) {
+      out.push({ claim: 'You have stepped back from something you had built up, and lost standing by doing it.', v: 'Bṛhat Jātaka 20.3 — Sun in the twelfth, a fall' });
+    }
+    return out;
+  }
+
   function checksFor(c, age) {
     var b = band(age);
     var out = [];
@@ -104,8 +131,7 @@
       if (moonUnderSaturn(c)) {
         out.push({ claim: 'The room where you were born was dim or dark rather than brightly lit.', v: 'Bṛhat Jātaka 5.17 — Moon under Saturn, birth in darkness' });
       }
-      var hard = maleficsFromMoon(c);
-      if (hard.length) {
+      if (maleficsFromMoon(c).length) {
         out.push({ claim: 'Your mother’s labour was difficult or drawn out.', v: 'Bṛhat Jātaka 5.17 — malefics in the 4th and 7th from the Moon' });
       }
       var side = roomSide(c);
@@ -120,11 +146,10 @@
     }
 
     if (b === 'B') {
+      out = out.concat(bodyChecks(c));
       var third = (c.bhavas[2] && c.bhavas[2].planetsInHouse) || [];
-      var thirdLord = c.bhavas[2] && c.bhavas[2].rashiLord;
-      var lonely = third.length === 0;
       out.push({
-        claim: lonely
+        claim: third.length === 0
           ? 'You grew up largely on your own — an only child, or with siblings much older or much younger.'
           : 'You grew up with brothers or sisters close to you in age.',
         v: 'Third bhāva — siblings and companions'
@@ -139,15 +164,11 @@
       if (vl && (vl.isCombust || vl.house === 6 || vl.house === 8 || vl.house === 12)) {
         out.push({ claim: 'Your schooling was interrupted at some point — a break, a change of school, or a year that did not go well.', v: 'Fifth lord afflicted — study interrupted' });
       }
-      var sixthOcc = (c.bhavas[5] && c.bhavas[5].planetsInHouse) || [];
-      if (sixthOcc.length) {
-        out.push({ claim: 'You had a recurring childhood complaint — something that came back more than once.', v: 'Sixth bhāva occupied' });
-      }
-      out.push({ claim: 'As a child you were noticeably quicker to learn by doing than by being taught.', v: 'Third and fifth bhāvas — applied versus formal learning' });
       out.push({ claim: 'One of your parents was often away, or the household was run largely by one of them.', v: 'Ninth and fourth bhāvas — father and mother' });
     }
 
     if (b === 'C' || b === 'D') {
+      out = out.concat(bodyChecks(c));
       var ninth = c.bhavas[8] && c.bhavas[8].rashiLord;
       var nl = ninth && c.planets[ninth];
       out.push({
@@ -197,7 +218,7 @@
     panel.innerHTML =
       '<div class="vf-head"><h2>Before the reading — check the chart</h2>' +
       '<span>' + (age === null ? 'age unknown' : 'age ' + age) + '</span></div>' +
-      '<p class="vf-note">These are not predictions. Each one is a statement the chart makes about your own past, drawn from Bṛhat Jātaka chapter 5. Answer honestly. If most are right, the chart is sound. If most are wrong, it is the birth data that is wrong — usually the time — and any reading built on it would be worthless.</p>' +
+      '<p class="vf-note">These are not predictions. Each one is a statement the chart makes about your own past, from Bṛhat Jātaka chapters 5 and 20. Answer honestly. If most are right, the chart is sound. If most are wrong, it is the birth data that is wrong — usually the time — and any reading built on it would be worthless.</p>' +
       '<div class="vf-load" id="vf-load"><span class="vf-spin"></span>Working through the chart…</div>' +
       '<div id="vf-list"></div><div id="vf-verdict"></div>';
 
@@ -237,7 +258,7 @@
     var box = document.getElementById('vf-verdict');
     if (answered < total) {
       box.className = 'vf-verdict';
-      box.innerHTML = '<b>' + answered + ' of ' + total + ' answered</b><p>Finish the five and the verdict appears here.</p>';
+      box.innerHTML = '<b>' + answered + ' of ' + total + ' answered</b><p>Finish all five and the verdict appears here.</p>';
       return;
     }
     var pass = right >= Math.ceil(total * 0.6);
@@ -247,7 +268,6 @@
       : '<b>' + right + ' of ' + total + ' — the birth data is in doubt</b><p>Too few statements matched. The most likely cause is the recorded birth time: it may have been rounded, remembered wrongly, or written in a different convention. The reading below is shown for completeness, but treat it as unreliable until the time is corrected.</p>';
   }
 
-  // Capture the chart app.js computes, then render after it finishes.
   function hook() {
     if (!window.Phalita || !window.Phalita.calculateFullJyotishaChart) return false;
     var orig = window.Phalita.calculateFullJyotishaChart;
