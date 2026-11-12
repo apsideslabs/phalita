@@ -10,8 +10,8 @@
  * framing decides which side of the evidence is reported, and an absent
  * negative is stated as an absent negative.
  *
- * The reason clause comes from a DIFFERENT finding than the claim, so it adds
- * a fact rather than restating the claim.
+ * The claim is one finding; the reason is the next one; the counter is the
+ * strongest finding on the other side. No sentence is printed twice.
  *
  * The corroboration rule from Phaladīpikā 15.6 governs: a question the source
  * catalogue marks serious or fatal is withheld unless two conditions agree.
@@ -66,13 +66,12 @@ export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Quest
     const other = reportAdverse ? good : bad;
     const sidePresent = side.length > 0 && side.reduce((s, f) => s + f.weight, 0) > 0;
 
-    const leadRaw = side.slice(0, 2).map((f) => f.predicts || f.text);
-    const lead = Array.from(new Set(leadRaw));
-    // The reason must be a DIFFERENT finding from the claim, or it is not a reason.
-    const evidence = side.slice(1, 2).map((f) => f.text);
+    const claim = side.slice(0, 1).map((f) => f.predicts || f.text);
+    const reason = side.slice(1, 2).map((f) => f.text);
     const counter = Array.from(new Set(other.slice(0, 1).map((f) => f.predicts || f.text)))
-      .filter((t) => !lead.includes(t));
-    const reasonClause = evidence[0] ? ` — because ${noDot(evidence[0])}.` : '';
+      .filter((t) => !claim.includes(t));
+    const reasonClause = reason[0] ? ` — because ${noDot(reason[0])}.` : '';
+    const claimText = claim.map((t) => cap(noDot(t))).join('; ');
 
     let answer: string;
     if (thin) {
@@ -86,19 +85,19 @@ export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Quest
         ' The question is asked in the negative; the chart answers it in the positive.';
     } else if (reportAdverse) {
       answer =
-        `${lead.map((t) => cap(noDot(t))).join('; ')}.` + reasonClause +
+        `${claimText}.` + reasonClause +
         (counter[0] ? ` What still holds it up: ${noDot(counter[0])}.` : ' Nothing in the chart offsets it.');
     } else if (margin < 1.5) {
-      answer = `Close to even. ${lead[0] ? cap(lead[0]) + '.' : ''} ${
+      answer = `Close to even. ${claim[0] ? cap(claim[0]) + '.' : ''} ${
         counter[0] ? 'But ' + counter[0] + '.' : ''
       } The chart does not settle it, so the outcome is more likely to be decided by circumstance than by the chart.`;
     } else if (chartFavourable) {
       answer =
-        `${lead.map((t) => cap(noDot(t))).join('; ')}.` + reasonClause +
+        `${claimText}.` + reasonClause +
         (counter[0] ? ` What works against it: ${noDot(counter[0])}.` : ' Nothing of weight opposes it in this chart.');
     } else {
       answer =
-        `${lead.map((t) => cap(noDot(t))).join('; ')}.` + reasonClause +
+        `${claimText}.` + reasonClause +
         (counter[0] ? ` What still holds it up: ${noDot(counter[0])}.` : ' Nothing in the chart offsets it.');
     }
 
