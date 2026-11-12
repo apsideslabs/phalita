@@ -102,9 +102,13 @@ export function readBhava(chart: JyotishaChart, h: number): Finding[] {
       text: `The lord of the ${ORD[h]} is burnt by the Sun — its power to deliver ${meaning} is cut down` });
   }
 
+  // Phaladīpikā 9.20: वक्रं गतः स्वोच्चफलं विदध्यात् — a retrograde graha gives
+  // its exaltation phala, even in an enemy sign or its debilitation. It
+  // strengthens; it does not obstruct. (This previously cited 15.13, the sandhi
+  // verse, and read retrograde as adverse — both were wrong.)
   if (p.isRetrograde) {
-    out.push({ side: 'b', weight: 0.8, ground: 'Phaladīpikā 15.13',
-      text: `The lord of the ${ORD[h]} is retrograde — ${meaning} returns and repeats rather than settling` });
+    out.push({ side: 'a', weight: 1.2, ground: 'Phaladīpikā 9.20',
+      text: `The lord of the ${ORD[h]} is retrograde — 9.20 gives a retrograde graha its exaltation phala even in an inimical sign, so ${meaning} acts with more force than the placement alone suggests` });
   }
 
   const occ = (house.planetsInHouse ?? []) as PlanetId[];
