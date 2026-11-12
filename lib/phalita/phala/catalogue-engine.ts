@@ -1,20 +1,12 @@
 /**
  * PHALITA — evaluating the catalogue against a chart.
  *
- * Every question names the bhāvas that answer it. Each of those bhāvas is read
- * by the rule layer, which turns every condition of the text that applies into
- * a concrete sentence about this chart.
- *
- * The answer must answer the question ASKED. A question about interruption is
- * not answered by reciting what supports the house — so the question's own
- * framing decides which side of the evidence is reported, and an absent
- * negative is stated as an absent negative.
+ * The answer must answer the question ASKED: the question's own framing decides
+ * which side of the evidence is reported, and an absent negative is stated as
+ * an absent negative.
  *
  * The claim is one finding; the reason is the next one; the counter is the
  * strongest finding on the other side. No sentence is printed twice.
- *
- * The corroboration rule from Phaladīpikā 15.6 governs: a question the source
- * catalogue marks serious or fatal is withheld unless two conditions agree.
  */
 
 import type { JyotishaChart } from '@/lib/jyotisha/types';
@@ -25,13 +17,6 @@ import { readBhavas } from './rules';
 /** Question wording that asks about the adverse side of a matter. */
 const NEGATIVE_FRAMING = /(interrupt|discontinu|loss|lose|lost|difficult|weak|risk|obstacle|delay|deni|conflict|fail|doubt|struggle|adverse|afflict|damage|break|obstruct|problem|concern|challenge|vulnerab|deficit|lack|absence|hardship|suffer|decline|setback|enemy|enemies|dispute|separation|illness|disease|danger|harm|stress|tension|burden|debt|anxiety|fear|worry|crisis|mishap|downfall|instability|friction|loss of)/i;
 
-/**
- * Build catalogue answers.
- *
- * Pass `onlyDomain` to evaluate a single domain: the filter runs before any
- * rule is evaluated, so a domain page builds its ten answers rather than all
- * 250.
- */
 export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Question[] {
   const out: Question[] = [];
 
@@ -58,10 +43,7 @@ export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Quest
     const serious = sev !== 'm';
     const thin = serious && leading < 2;
 
-    // Which side the QUESTION is about, independent of which side the chart favours.
-    const asksAboutAdverse = NEGATIVE_FRAMING.test(question);
-    const reportAdverse = asksAboutAdverse;
-
+    const reportAdverse = NEGATIVE_FRAMING.test(question);
     const side = reportAdverse ? bad : good;
     const other = reportAdverse ? good : bad;
     const sidePresent = side.length > 0 && side.reduce((s, f) => s + f.weight, 0) > 0;
@@ -70,7 +52,8 @@ export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Quest
     const reason = side.slice(1, 2).map((f) => f.text);
     const counter = Array.from(new Set(other.slice(0, 1).map((f) => f.predicts || f.text)))
       .filter((t) => !claim.includes(t));
-    const reasonClause = reason[0] ? ` — because ${noDot(reason[0])}.` : '';
+    // "— because the lord…", not "— because The lord…".
+    const reasonClause = reason[0] ? ` — because ${noDot(lc(reason[0]))}.` : '';
     const claimText = claim.map((t) => cap(noDot(t))).join('; ');
 
     let answer: string;
@@ -78,7 +61,6 @@ export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Quest
       answer =
         'Not enough to call. Only one condition of the chart bears on this, and a question of this weight is not settled by a single placement — the engine withholds it rather than pronouncing it.';
     } else if (reportAdverse && !sidePresent) {
-      // The question asks about a difficulty; the chart does not show one. Say so.
       answer =
         'Nothing of weight in this chart points to that. ' +
         (other[0] ? `${cap(noDot(other[0].predicts || other[0].text))} — and nothing material stands against it.` : 'The conditions this question asks about do not arise here.') +
@@ -129,4 +111,5 @@ export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Quest
 }
 
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+const lc = (s: string) => (s ? s.charAt(0).toLowerCase() + s.slice(1) : s);
 const noDot = (s: string) => s.replace(/\.+$/, '');
