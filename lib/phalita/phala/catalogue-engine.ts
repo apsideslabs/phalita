@@ -10,6 +10,9 @@
  * framing decides which side of the evidence is reported, and an absent
  * negative is stated as an absent negative.
  *
+ * The reason clause comes from a DIFFERENT finding than the claim, so it adds
+ * a fact rather than restating the claim.
+ *
  * The corroboration rule from Phaladīpikā 15.6 governs: a question the source
  * catalogue marks serious or fatal is withheld unless two conditions agree.
  */
@@ -65,9 +68,11 @@ export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Quest
 
     const leadRaw = side.slice(0, 2).map((f) => f.predicts || f.text);
     const lead = Array.from(new Set(leadRaw));
-    const evidence = side.slice(0, 1).map((f) => f.text);
+    // The reason must be a DIFFERENT finding from the claim, or it is not a reason.
+    const evidence = side.slice(1, 2).map((f) => f.text);
     const counter = Array.from(new Set(other.slice(0, 1).map((f) => f.predicts || f.text)))
       .filter((t) => !lead.includes(t));
+    const reasonClause = evidence[0] ? ` — because ${noDot(evidence[0])}.` : '';
 
     let answer: string;
     if (thin) {
@@ -77,13 +82,11 @@ export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Quest
       // The question asks about a difficulty; the chart does not show one. Say so.
       answer =
         'Nothing of weight in this chart points to that. ' +
-        (lead.length ? '' : '') +
         (other[0] ? `${cap(noDot(other[0].predicts || other[0].text))} — and nothing material stands against it.` : 'The conditions this question asks about do not arise here.') +
         ' The question is asked in the negative; the chart answers it in the positive.';
     } else if (reportAdverse) {
       answer =
-        `${lead.map((t) => cap(noDot(t))).join('; ')}.` +
-        (evidence[0] ? ` — because ${noDot(evidence[0])}.` : '') +
+        `${lead.map((t) => cap(noDot(t))).join('; ')}.` + reasonClause +
         (counter[0] ? ` What still holds it up: ${noDot(counter[0])}.` : ' Nothing in the chart offsets it.');
     } else if (margin < 1.5) {
       answer = `Close to even. ${lead[0] ? cap(lead[0]) + '.' : ''} ${
@@ -91,13 +94,11 @@ export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Quest
       } The chart does not settle it, so the outcome is more likely to be decided by circumstance than by the chart.`;
     } else if (chartFavourable) {
       answer =
-        `${lead.map((t) => cap(noDot(t))).join('; ')}.` +
-        (evidence[0] ? ` — because ${noDot(evidence[0])}.` : '') +
+        `${lead.map((t) => cap(noDot(t))).join('; ')}.` + reasonClause +
         (counter[0] ? ` What works against it: ${noDot(counter[0])}.` : ' Nothing of weight opposes it in this chart.');
     } else {
       answer =
-        `${lead.map((t) => cap(noDot(t))).join('; ')}.` +
-        (evidence[0] ? ` — because ${noDot(evidence[0])}.` : '') +
+        `${lead.map((t) => cap(noDot(t))).join('; ')}.` + reasonClause +
         (counter[0] ? ` What still holds it up: ${noDot(counter[0])}.` : ' Nothing in the chart offsets it.');
     }
 
