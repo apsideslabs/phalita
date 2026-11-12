@@ -2,15 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="phalita-build" content="v14" />
+<meta name="phalita-build" content="v15" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Read your chart — Phalita</title>
 <meta name="description" content="A reading of your birth chart, chapter by chapter, from Phaladīpikā." />
-<link rel="stylesheet" href="./css/style.css?v=14" />
-<link rel="stylesheet" href="./css/reading.css?v=14" />
-<link rel="stylesheet" href="./css/verify.css?v=14" />
+<link rel="stylesheet" href="./css/style.css?v=15" />
+<link rel="stylesheet" href="./css/reading.css?v=15" />
+<link rel="stylesheet" href="./css/verify.css?v=15" />
 <style>
-/* The disclosure is a disclosure, not a form label. */
 .adv { margin-top: 0.35rem; }
 .adv summary {
   cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 0.3rem;
@@ -25,23 +24,17 @@
   margin: 0.35rem 0 0.2rem; font-size: 0.76rem; line-height: 1.55;
   color: #8f8f8f; text-transform: none; letter-spacing: 0;
 }
-
-/* The hint is advice, not a warning label. */
 .bform .hint, .vform .hint {
   text-transform: none; letter-spacing: 0; font-size: 0.78rem;
   line-height: 1.55; color: #8a8a8a; max-width: 34ch;
 }
-
-/* Form card was 1.6rem of padding on a 390px screen. */
 @media (max-width: 560px) {
   .bform { padding: 1.05rem 1rem 1.1rem; border-radius: 16px; }
   .bform .row.actions { gap: 0.6rem; }
   .bform button[type=submit] { width: 100%; }
 }
-
 .bform label.wide, .vform label.wide { flex: 1 1 100%; }
 
-/* After submit the form folds to a summary bar so the check is the first thing. */
 .bform.collapsed .row,
 .bform.collapsed .adv,
 .bform.collapsed .hint { display: none; }
@@ -50,13 +43,13 @@
 .bform.collapsed .row.actions button { width: auto; }
 .bform.collapsed .row.actions button::after { content: ' again'; }
 
-/* The sticky header was covering the panel heading after scrollIntoView. */
 #verify-panel { scroll-margin-top: 92px; }
 #out { scroll-margin-top: 92px; }
-
-/* Correct and Wrong should read as opposite actions at a glance. */
 .vf-btns button.yes { border-color: #bcd9c6; color: #2f6b4f; }
 .vf-btns button.no  { border-color: #efc9c0; color: #9a3b2c; }
+
+/* The reading is withheld until the check is finished. */
+#out.gated { display: none; }
 </style>
 </head>
 <body>
@@ -91,20 +84,20 @@
     <form id="birth" class="bform">
       <div class="row">
         <label class="wide"><span>Place of birth</span>
-          <input type="text" id="place" name="place" list="placelist" placeholder="Start typing a city or village…" autocomplete="off" value="Guwahati, Assam" />
+          <input type="text" id="place" name="place" placeholder="Start typing a city or village…" autocomplete="off" />
           <datalist id="placelist"></datalist>
         </label>
       </div>
       <div class="row">
-        <label><span>Date of birth</span><input type="date" name="date" value="1990-08-15" required /></label>
-        <label><span>Time of birth</span><input type="time" name="time" value="06:45" required /></label>
+        <label><span>Date of birth</span><input type="date" name="date" required /></label>
+        <label><span>Time of birth</span><input type="time" name="time" required /></label>
       </div>
       <details class="adv">
         <summary>Coordinates, if the place is not listed</summary>
         <div class="row">
-          <label><span>Latitude</span><input type="number" name="lat" step="0.0001" value="26.1445" required /></label>
-          <label><span>Longitude</span><input type="number" name="lon" step="0.0001" value="91.7362" required /></label>
-          <label><span>UTC offset</span><input type="number" name="tz" step="0.25" value="5.5" required /></label>
+          <label><span>Latitude</span><input type="number" name="lat" step="0.0001" required /></label>
+          <label><span>Longitude</span><input type="number" name="lon" step="0.0001" required /></label>
+          <label><span>UTC offset</span><input type="number" name="tz" step="0.25" required /></label>
         </div>
         <p class="advnote">Offsets are standard time. India has no daylight saving; some countries do, so subtract an hour if the birth fell in a summer-time period.</p>
       </details>
@@ -131,26 +124,47 @@
   </div>
 </footer>
 
-<script src="./js/place.js?v=14"></script>
-<script src="./js/engine.js?v=14"></script>
-<script src="./js/verify.js?v=14"></script>
-<script src="./js/app.js?v=14"></script>
+<script src="./js/place.js?v=15"></script>
+<script src="./js/engine.js?v=15"></script>
+<script src="./js/verify.js?v=15"></script>
+<script src="./js/app.js?v=15"></script>
 <script>
-/* Fold the form after submit and go straight to the check. */
 (function () {
   var form = document.getElementById('birth');
-  if (!form) return;
+  var out = document.getElementById('out');
+  if (!form || !out) return;
+
+  // Fold the form and go to the check after submit.
   form.addEventListener('submit', function () {
     setTimeout(function () {
       form.classList.add('collapsed');
-      var v = document.getElementById('verify-panel') || document.getElementById('out');
+      var v = document.getElementById('verify-panel') || out;
       if (v) v.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 900);
   });
+
+  // Re-open the form if the folded bar is tapped.
   form.addEventListener('click', function (e) {
     if (form.classList.contains('collapsed') && e.target.tagName === 'BUTTON') {
       form.classList.remove('collapsed');
     }
+  });
+
+  // Hold the reading back until all five checks are answered.
+  var mo = new MutationObserver(function () {
+    var panel = document.getElementById('verify-panel');
+    if (panel && !out.classList.contains('gated') && !out.dataset.revealed) {
+      out.classList.add('gated');
+    }
+    var v = document.getElementById('vf-verdict');
+    if (v && (v.classList.contains('pass') || v.classList.contains('fail'))) {
+      out.dataset.revealed = '1';
+      out.classList.remove('gated');
+    }
+  });
+  mo.observe(document.body, {
+    childList: true, subtree: true,
+    attributes: true, attributeFilter: ['class']
   });
 })();
 </script>
