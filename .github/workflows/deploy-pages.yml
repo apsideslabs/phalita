@@ -53,23 +53,42 @@ jobs:
           fi
 
       # ---- the place index ----------------------------------------------
-      # GeoNames is CC BY 4.0 and cannot be committed: the data runs to ~47 MB.
-      # CI has open network, so the index is rebuilt on every deploy instead.
+      # GeoNames is CC BY 4.0 and cannot be committed. The India extract alone
+      # is ~90 MB zipped and unzips to ~300 MB, so the index is rebuilt on every
+      # deploy. IN.txt carries every populated place in India — 5.5 lakh
+      # villages — which is what makes village-name birthplaces searchable.
       - name: Build the place index
         run: |
           set -e
           mkdir -p /tmp/gn /tmp/placebuild/public
           base=https://download.geonames.org/export/dump
-          curl -sSL --retry 3 -o /tmp/gn/cities5000.zip      $base/cities5000.zip
-          curl -sSL --retry 3 -o /tmp/gn/timeZones.txt       $base/timeZones.txt
-          curl -sSL --retry 3 -o /tmp/gn/countryInfo.txt     $base/countryInfo.txt
-          curl -sSL --retry 3 -o /tmp/gn/admin1CodesASCII.txt $base/admin1CodesASCII.txt
+
+          for f in cities5000.zip cities1000.zip cities500.zip IN.zip; do
+            echo "fetching $f"
+            curl -sSL --retry 3 --retry-delay 2 -o "/tmp/gn/$f" "$base/$f"
+          done
+          for f in timeZones.txt countryInfo.txt admin1CodesASCII.txt admin2Codes.txt; do
+            echo "fetching $f"
+            curl -sSL --retry 3 --retry-delay 2 -o "/tmp/gn/$f" "$base/$f"
+          done
+
           unzip -qo /tmp/gn/cities5000.zip -d /tmp/gn
+          unzip -qo /tmp/gn/cities1000.zip -d /tmp/gn
+          unzip -qo /tmp/gn/cities500.zip  -d /tmp/gn
+          unzip -qo /tmp/gn/IN.zip         -d /tmp/gn
+
+          echo '--- inputs ---'
+          ls -la /tmp/gn/*.txt | awk '{print $5, $9}'
+
           # the script writes to public/data relative to its cwd; point that at web/
           ln -sfn "$GITHUB_WORKSPACE/web" /tmp/placebuild/public/data
           cd /tmp/placebuild
           GN_DIR=/tmp/gn node "$GITHUB_WORKSPACE/scripts/build-cities.mjs"
-          ls -la "$GITHUB_WORKSPACE/web/data" | head
+
+          echo '--- output ---'
+          ls -la "$GITHUB_WORKSPACE/web" | head
+          echo "shards: $(ls "$GITHUB_WORKSPACE/web/in" 2>/dev/null | wc -l)"
+          du -sh "$GITHUB_WORKSPACE/web/in" 2>/dev/null || true
 
       # ---- the site -----------------------------------------------------
       - name: Bundle the engine for the browser
