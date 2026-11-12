@@ -1,13 +1,14 @@
 /**
- * PHALITA — evaluating the full catalogue against a chart.
+ * PHALITA — evaluating the catalogue against a chart.
  *
  * Every question names the bhāvas that answer it. Each of those bhāvas is read
  * by the rule layer, which turns every condition of the text that applies into
- * a concrete sentence about this chart — the planet, its sign, its house, and
- * what that means for the matter in question.
+ * a concrete sentence about this chart.
  *
- * The answer leads with what the text PREDICTS, and carries the condition
- * behind it as the reason.
+ * The answer must answer the question ASKED. A question about interruption is
+ * not answered by reciting what supports the house — so the question's own
+ * framing decides which side of the evidence is reported, and an absent
+ * negative is stated as an absent negative.
  *
  * The corroboration rule from Phaladīpikā 15.6 governs: a question the source
  * catalogue marks serious or fatal is withheld unless two conditions agree.
@@ -18,12 +19,15 @@ import type { Question, QFactor } from './questions';
 import { DOMAINS, NOTES, QUESTIONS, ROWS } from './catalogue';
 import { readBhavas } from './rules';
 
+/** Question wording that asks about the adverse side of a matter. */
+const NEGATIVE_FRAMING = /(interrupt|discontinu|loss|lose|lost|difficult|weak|risk|obstacle|delay|deni|conflict|fail|doubt|struggle|adverse|afflict|damage|break|obstruct|problem|concern|challenge|vulnerab|deficit|lack|absence|hardship|suffer|decline|setback|enemy|enemies|dispute|separation|illness|disease|danger|harm|stress|tension|burden|debt|anxiety|fear|worry|crisis|mishap|downfall|instability|friction|loss of)/i;
+
 /**
  * Build catalogue answers.
  *
  * Pass `onlyDomain` to evaluate a single domain: the filter runs before any
  * rule is evaluated, so a domain page builds its ten answers rather than all
- * 250. Without it, the whole catalogue is built.
+ * 250.
  */
 export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Question[] {
   const out: Question[] = [];
@@ -45,28 +49,47 @@ export function buildCatalogue(chart: JyotishaChart, onlyDomain?: string): Quest
     const pos = good.reduce((s, f) => s + f.weight, 0);
     const neg = bad.reduce((s, f) => s + f.weight, 0);
     const margin = Math.abs(pos - neg);
-    const favourable = pos > neg;
+    const chartFavourable = pos > neg;
 
-    const leading = favourable ? good.length : bad.length;
+    const leading = chartFavourable ? good.length : bad.length;
     const serious = sev !== 'm';
     const thin = serious && leading < 2;
 
-    // The answer leads with what the text PREDICTS, then shows the evidence.
-    const leadRaw = (favourable ? good : bad).slice(0, 2).map((f) => f.predicts || f.text);
+    // Which side the QUESTION is about, independent of which side the chart favours.
+    const asksAboutAdverse = NEGATIVE_FRAMING.test(question);
+    const reportAdverse = asksAboutAdverse;
+
+    const side = reportAdverse ? bad : good;
+    const other = reportAdverse ? good : bad;
+    const sidePresent = side.length > 0 && side.reduce((s, f) => s + f.weight, 0) > 0;
+
+    const leadRaw = side.slice(0, 2).map((f) => f.predicts || f.text);
     const lead = Array.from(new Set(leadRaw));
-    const evidence = (favourable ? good : bad).slice(0, 1).map((f) => f.text);
-    const counter = Array.from(new Set((favourable ? bad : good).slice(0, 1).map((f) => f.predicts || f.text)))
+    const evidence = side.slice(0, 1).map((f) => f.text);
+    const counter = Array.from(new Set(other.slice(0, 1).map((f) => f.predicts || f.text)))
       .filter((t) => !lead.includes(t));
 
     let answer: string;
     if (thin) {
       answer =
         'Not enough to call. Only one condition of the chart bears on this, and a question of this weight is not settled by a single placement — the engine withholds it rather than pronouncing it.';
+    } else if (reportAdverse && !sidePresent) {
+      // The question asks about a difficulty; the chart does not show one. Say so.
+      answer =
+        'Nothing of weight in this chart points to that. ' +
+        (lead.length ? '' : '') +
+        (other[0] ? `${cap(noDot(other[0].predicts || other[0].text))} — and nothing material stands against it.` : 'The conditions this question asks about do not arise here.') +
+        ' The question is asked in the negative; the chart answers it in the positive.';
+    } else if (reportAdverse) {
+      answer =
+        `${lead.map((t) => cap(noDot(t))).join('; ')}.` +
+        (evidence[0] ? ` — because ${noDot(evidence[0])}.` : '') +
+        (counter[0] ? ` What still holds it up: ${noDot(counter[0])}.` : ' Nothing in the chart offsets it.');
     } else if (margin < 1.5) {
       answer = `Close to even. ${lead[0] ? cap(lead[0]) + '.' : ''} ${
         counter[0] ? 'But ' + counter[0] + '.' : ''
       } The chart does not settle it, so the outcome is more likely to be decided by circumstance than by the chart.`;
-    } else if (favourable) {
+    } else if (chartFavourable) {
       answer =
         `${lead.map((t) => cap(noDot(t))).join('; ')}.` +
         (evidence[0] ? ` — because ${noDot(evidence[0])}.` : '') +
