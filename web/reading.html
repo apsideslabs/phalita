@@ -2,26 +2,53 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="phalita-build" content="v12" />
+<meta name="phalita-build" content="v13" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Read your chart — Phalita</title>
 <meta name="description" content="A reading of your birth chart, chapter by chapter, from Phaladīpikā." />
-<link rel="stylesheet" href="./css/style.css?v=12" />
-<link rel="stylesheet" href="./css/reading.css?v=12" />
-<link rel="stylesheet" href="./css/verify.css?v=12" />
+<link rel="stylesheet" href="./css/style.css?v=13" />
+<link rel="stylesheet" href="./css/reading.css?v=13" />
+<link rel="stylesheet" href="./css/verify.css?v=13" />
 <style>
-.adv { margin-top: 0.6rem; }
+/* The disclosure is a disclosure, not a form label. */
+.adv { margin-top: 0.35rem; }
 .adv summary {
-  cursor: pointer; font-size: 0.72rem; font-weight: 700;
-  letter-spacing: 0.06em; text-transform: uppercase; color: #9a9a9a;
-  list-style: none; padding: 0.35rem 0;
+  cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 0.3rem;
+  font-family: var(--sans); font-size: 0.8rem; font-weight: 700;
+  letter-spacing: -0.005em; text-transform: none; color: var(--maroon-deep);
+  padding: 0.45rem 0;
 }
 .adv summary::-webkit-details-marker { display: none; }
-.adv summary::after { content: ' ▾'; color: #c4c4c4; }
-.adv[open] summary::after { content: ' ▴'; }
-.adv summary:hover { color: var(--maroon-deep); }
-.advnote { margin: 0.5rem 0 0; font-size: 0.74rem; line-height: 1.55; color: #9a9a9a; }
+.adv summary::after { content: '⌄'; font-size: 0.95rem; line-height: 1; color: #c9a882; }
+.adv[open] summary::after { content: '⌃'; }
+.advnote {
+  margin: 0.35rem 0 0.2rem; font-size: 0.76rem; line-height: 1.55;
+  color: #8f8f8f; text-transform: none; letter-spacing: 0;
+}
+
+/* The hint is advice, not a warning label. */
+.bform .hint, .vform .hint {
+  text-transform: none; letter-spacing: 0; font-size: 0.78rem;
+  line-height: 1.55; color: #8a8a8a; max-width: 34ch;
+}
+
+/* Form card was 1.6rem of padding on a 390px screen. */
+@media (max-width: 560px) {
+  .bform { padding: 1.05rem 1rem 1.1rem; border-radius: 16px; }
+  .bform .row.actions { gap: 0.6rem; }
+  .bform button[type=submit] { width: 100%; }
+}
+
 .bform label.wide, .vform label.wide { flex: 1 1 100%; }
+
+/* After submit the form folds to a summary bar so the check is the first thing. */
+.bform.collapsed .row,
+.bform.collapsed .adv,
+.bform.collapsed .hint { display: none; }
+.bform.collapsed { padding: 0.85rem 1rem; }
+.bform.collapsed .row.actions { display: flex; }
+.bform.collapsed .row.actions button { width: auto; }
+.bform.collapsed .row.actions button::after { content: ' again'; }
 </style>
 </head>
 <body>
@@ -75,7 +102,7 @@
       </details>
       <div class="row actions">
         <button type="submit">Read the chart</button>
-        <span class="hint">Not sure of the exact time? Use the birth certificate time; an hour of error shifts the lagna, not the planets.</span>
+        <span class="hint">Not sure of the exact time? Use the birth certificate time. An hour of error shifts the lagna, not the planets.</span>
       </div>
     </form>
   </div>
@@ -96,9 +123,28 @@
   </div>
 </footer>
 
-<script src="./js/place.js?v=12"></script>
-<script src="./js/engine.js?v=12"></script>
-<script src="./js/verify.js?v=12"></script>
-<script src="./js/app.js?v=12"></script>
+<script src="./js/place.js?v=13"></script>
+<script src="./js/engine.js?v=13"></script>
+<script src="./js/verify.js?v=13"></script>
+<script src="./js/app.js?v=13"></script>
+<script>
+/* Fold the form after submit and go straight to the check. */
+(function () {
+  var form = document.getElementById('birth');
+  if (!form) return;
+  form.addEventListener('submit', function () {
+    setTimeout(function () {
+      form.classList.add('collapsed');
+      var v = document.getElementById('verify-panel') || document.getElementById('out');
+      if (v) v.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 900);
+  });
+  form.addEventListener('click', function (e) {
+    if (form.classList.contains('collapsed') && e.target.tagName === 'BUTTON') {
+      form.classList.remove('collapsed');
+    }
+  });
+})();
+</script>
 </body>
 </html>
