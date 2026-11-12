@@ -1,18 +1,19 @@
 /**
  * PHALITA — the rule layer.
  *
- * Each rule is a condition the texts state, tested against the chart, which
- * produces a finding: what the text PREDICTS for the bhāva, where a rule
- * states one, and the evidence that produced it.
+ * Each rule is a condition the texts state, tested against the chart. A finding
+ * carries the condition, the phala the verse gives for it where the corpus
+ * states one, and the verse itself.
  *
- * `predicts` is deliberately sparse. A dignity, placement, aspect or strength
- * observation is narrower than a prediction about marriage, health, longevity
- * or wealth, and must not be inflated into one. Only a rule whose source states
- * that phala — 12.1 and 12.3 in verse-rules.ts — sets it.
+ * `predicts` is set only from verses-phala.ts — never inferred from a placement.
+ * Occupant and aspect findings contribute weight and name their general verse;
+ * the lord's line carries the prediction, because that is what the phala
+ * verses in chapter 16 are about.
  */
 
 import type { JyotishaChart, PlanetId } from '@/lib/jyotisha/types';
 import { GRAHA_PROPERTIES } from '@/lib/jyotisha/constants';
+import { phalaFor, RETROGRADE } from './verses-phala';
 
 export const BEN: PlanetId[] = ['jupiter', 'venus', 'moon', 'mercury'];
 const MAL: PlanetId[] = ['sun', 'mars', 'saturn', 'rahu', 'ketu'];
@@ -43,6 +44,7 @@ export const BHAVA_MEANING: Record<number, string> = {
 
 const name = (p: PlanetId) => GRAHA_PROPERTIES[p]?.name ?? p;
 const ORD = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th'];
+const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 const dig = (d: string): number => {
   if (/Exalted/.test(d)) return 3;
@@ -62,9 +64,8 @@ export interface Finding {
   side: 'a' | 'b';
   weight: number;
   ground: string;
-  /** Set only where a rule's source states the phala. Never inferred. */
+  /** Set only where a verse states the phala. Never inferred. */
   predicts?: string;
-  /** Set when a severe finding was tested against its compound condition. */
   compound?: 'satisfied' | 'single-condition';
 }
 
@@ -75,79 +76,98 @@ export function readBhava(chart: JyotishaChart, h: number): Finding[] {
   const lord = house.rashiLord as PlanetId;
   const p = chart.planets[lord];
   const meaning = BHAVA_MEANING[h] ?? 'this matter';
-
   if (!p) return out;
 
   const d = dig(p.dignity);
-  if (d > 0) {
-    out.push({ side: 'a', weight: d, ground: 'Phaladīpikā 15.1',
-      text: `The lord of the ${ORD[h]}, ${name(lord)}, is ${p.dignity} in ${p.rashiName} — the strongest support for ${meaning}` });
-  } else if (d < 0) {
-    out.push({ side: 'b', weight: -d, ground: 'Phaladīpikā 15.1',
-      text: `The lord of the ${ORD[h]}, ${name(lord)}, is ${p.dignity} in ${p.rashiName} — this works against ${meaning}` });
+  const inDust = DUS.includes(p.house);
+  const inKendra = KENDRA.includes(p.house);
+
+  // ---- the lord: ONE finding --------------------------------------------
+  // Placement decides over dignity, because 16.4 does (सुस्थे सुखी /
+  // दुःस्थे दुःखी). Dignity is named, but there is a single verdict.
+  if (inDust || d !== 0 || inKendra) {
+    const side: 'a' | 'b' = inDust ? 'b' : d < 0 ? 'b' : 'a';
+    const line = phalaFor(h, side);
+    const dignityText = `${p.dignity} in ${p.rashiName}`;
+    let text: string;
+    if (inDust) {
+      text = d > 0
+        ? `The lord of the ${ORD[h]}, ${name(lord)}, is ${dignityText} but has fallen into the ${ORD[p.house]}`
+        : `The lord of the ${ORD[h]}, ${name(lord)}, is ${dignityText} and has fallen into the ${ORD[p.house]}`;
+    } else if (d < 0) {
+      text = `The lord of the ${ORD[h]}, ${name(lord)}, is ${dignityText}`;
+    } else if (d > 0) {
+      text = `The lord of the ${ORD[h]}, ${name(lord)}, is ${dignityText}`;
+    } else {
+      text = `The lord of the ${ORD[h]}, ${name(lord)}, is ${dignityText}, neither strengthened nor spoilt by it`;
+    }
+    if (line) text += ` — ${line.verse} reads that as ${line.phala}`;
+    else text += ` — the corpus carries no phala verse for the ${ORD[h]}, so this is recorded as a condition only`;
+
+    out.push({
+      side,
+      weight: inDust ? 2.0 : Math.max(0.8, Math.abs(d)),
+      ground: line ? `Phaladīpikā ${line.verse.split('.').slice(1).join('.')}` : 'Phaladīpikā 15.1',
+      predicts: line ? cap(line.phala) + '.' : undefined,
+      text,
+    });
   }
 
-  if (DUS.includes(p.house)) {
-    out.push({ side: 'b', weight: 2.0, ground: 'Phaladīpikā 15.4',
-      text: `The lord of the ${ORD[h]} has fallen into the ${ORD[p.house]}, a duḥsthāna — this obstructs ${meaning} and delays its results` });
-  }
-
-  if (KENDRA.includes(p.house)) {
-    out.push({ side: 'a', weight: 1.0, ground: 'Phaladīpikā 15.2',
-      text: `The lord of the ${ORD[h]} stands in a kendra, the ${ORD[p.house]} — ${meaning} has room to act` });
-  }
-
+  // ---- combustion --------------------------------------------------------
   if (p.isCombust) {
     out.push({ side: 'b', weight: 1.2, ground: 'Phaladīpikā 15.3',
       text: `The lord of the ${ORD[h]} is burnt by the Sun — its power to deliver ${meaning} is cut down` });
   }
 
-  // Phaladīpikā 9.20: वक्रं गतः स्वोच्चफलं विदध्यात् — a retrograde graha gives
-  // its exaltation phala, even in an enemy sign or its debilitation. It
-  // strengthens; it does not obstruct. (This previously cited 15.13, the sandhi
-  // verse, and read retrograde as adverse — both were wrong.)
+  // ---- retrograde: 9.20, a strengthening ---------------------------------
   if (p.isRetrograde) {
     out.push({ side: 'a', weight: 1.2, ground: 'Phaladīpikā 9.20',
-      text: `The lord of the ${ORD[h]} is retrograde — 9.20 gives a retrograde graha its exaltation phala even in an inimical sign, so ${meaning} acts with more force than the placement alone suggests` });
+      predicts: cap(RETROGRADE.phala) + '.',
+      text: `The lord of the ${ORD[h]} is retrograde — ${RETROGRADE.verse} gives a retrograde graha the phala of its exaltation, even in an inimical sign` });
   }
 
+  // ---- occupants ---------------------------------------------------------
   const occ = (house.planetsInHouse ?? []) as PlanetId[];
   for (const o of occ) {
+    if (o === lord) continue;
     const nm = name(o);
     if (BEN.includes(o)) {
       out.push({ side: 'a', weight: 1.4, ground: 'Phaladīpikā 15.1',
-        text: `${nm} occupies the ${ORD[h]} — protection and good company for ${meaning}` });
+        text: `${nm}, a benefic, occupies the ${ORD[h]} — 15.1 counts benefic association as support for ${meaning}` });
     } else if (MAL.includes(o)) {
       out.push({ side: 'b', weight: 1.4, ground: 'Phaladīpikā 15.4',
-        text: `${nm} occupies the ${ORD[h]} — strain on ${meaning}, and what it promises comes at a cost` });
+        text: `${nm}, a malefic, occupies the ${ORD[h]} — 15.4 counts malefic occupancy as pressure on ${meaning}` });
     }
   }
 
+  // ---- aspects -----------------------------------------------------------
   for (const b of BEN) {
     if (chart.planets[b]?.aspectsToHouses?.includes(h)) {
       out.push({ side: 'a', weight: 1.2, ground: 'Phaladīpikā 15.2',
-        text: `${name(b)} aspects the ${ORD[h]} — ${meaning} is watched over` });
+        text: `${name(b)} aspects the ${ORD[h]} — 15.2 counts a benefic aspect as support` });
     }
   }
   for (const m of MAL) {
     if (chart.planets[m]?.aspectsToHouses?.includes(h)) {
       out.push({ side: 'b', weight: 1.2, ground: 'Phaladīpikā 15.4',
-        text: `${name(m)} aspects the ${ORD[h]} — malefic pressure on ${meaning}` });
+        text: `${name(m)} aspects the ${ORD[h]} — 15.4 counts a malefic aspect as pressure` });
     }
   }
 
+  // ---- kāraka ------------------------------------------------------------
   const karaka = KARAKA[h];
   if (karaka && karaka !== lord) {
     const kd = dig(chart.planets[karaka]?.dignity ?? '');
     if (kd > 0) {
       out.push({ side: 'a', weight: kd * 0.7, ground: 'Phaladīpikā 15.25',
-        text: `The kāraka of the ${ORD[h]}, ${name(karaka)}, is ${chart.planets[karaka]?.dignity} — the natural significator of ${meaning} is itself strong` });
+        text: `The kāraka of the ${ORD[h]}, ${name(karaka)}, is ${chart.planets[karaka]?.dignity} — 15.25 reads a strong significator as support` });
     } else if (kd < 0) {
       out.push({ side: 'b', weight: -kd * 0.7, ground: 'Phaladīpikā 15.25',
-        text: `The kāraka of the ${ORD[h]}, ${name(karaka)}, is ${chart.planets[karaka]?.dignity} — the natural significator of ${meaning} is itself weak` });
+        text: `The kāraka of the ${ORD[h]}, ${name(karaka)}, is ${chart.planets[karaka]?.dignity} — 15.25 reads a weak significator as a limit` });
     }
   }
 
+  // ---- strength ----------------------------------------------------------
   const sb = chart.shadbala as unknown as Record<string, { totalVirupas?: number }>;
   const mine = sb[lord]?.totalVirupas ?? 0;
   const seven: PlanetId[] = ['sun', 'moon', 'mars', 'mercury', 'jupiter', 'venus', 'saturn'];
@@ -156,34 +176,30 @@ export function readBhava(chart: JyotishaChart, h: number): Finding[] {
   if (mean > 0 && mine > 0) {
     if (mine > mean * 1.15) {
       out.push({ side: 'a', weight: 1.0, ground: 'Phaladīpikā 15.9',
-        text: `The lord of the ${ORD[h]} carries ${Math.round(mine)} virūpas against a mean of ${Math.round(mean)} — ${meaning} can be pushed through` });
+        text: `The lord carries ${Math.round(mine)} virūpas against a mean of ${Math.round(mean)} — 15.9 reads a strong lord as holding the defect small` });
     } else if (mine < mean * 0.85) {
       out.push({ side: 'b', weight: 1.0, ground: 'Phaladīpikā 15.9',
-        text: `The lord of the ${ORD[h]} carries only ${Math.round(mine)} virūpas against a mean of ${Math.round(mean)} — ${meaning} is under-resourced` });
+        text: `The lord carries only ${Math.round(mine)} virūpas against a mean of ${Math.round(mean)} — 15.9 reads a weak lord as multiplying the fault` });
     }
   }
 
+  // ---- relative houses ---------------------------------------------------
   const relOf = (x: number) => ((x - h + 12) % 12) + 1;
   for (const b of BEN) {
     const bh = chart.planets[b]?.house;
     if (bh && TRIKONA.includes(relOf(bh)) && bh !== h) {
       out.push({ side: 'a', weight: 1.3, ground: 'Phaladīpikā 15.2',
-        text: `${name(b)} stands in the ${ORD[relOf(bh)]} from the ${ORD[h]} — a trine support to ${meaning}` });
+        text: `${name(b)} stands in the ${ORD[relOf(bh)]} from the ${ORD[h]} — a trine, which 15.2 counts as support` });
     }
   }
   for (const m of MAL) {
     const mh = chart.planets[m]?.house;
-    if (mh && [6, 8, 12].includes(relOf(mh))) {
+    if (mh && DUS.includes(relOf(mh))) {
       out.push({ side: 'b', weight: 1.3, ground: 'Phaladīpikā 15.4',
-        text: `${name(m)} stands in the ${ORD[relOf(mh)]} from the ${ORD[h]} — this damages ${meaning}` });
+        text: `${name(m)} stands in the ${ORD[relOf(mh)]} from the ${ORD[h]} — 15.4 counts that as damage` });
     }
   }
 
-  // Do not attach a generic whole-house life outcome to every finding.
-  // A dignity, placement, aspect or strength observation is narrower than a
-  // prediction about marriage, health, longevity or wealth. `predicts` is
-  // populated only by a rule whose source states that phala and whose
-  // conditions were met — see verse-rules.ts.
   return applyCompoundGate(out, chart, h);
 }
 
@@ -195,7 +211,9 @@ export function readBhavas(chart: JyotishaChart, houses: number[]): Finding[] {
 }
 
 /**
- * The compound gate — Phaladīpikā 15.3 and 15.6, and MOD02 of the audit.
+ * The compound gate — Phaladīpikā 15.3 and 15.6.
+ *
+ * A severe reading needs independent conditions, not one planet counted thrice.
  */
 function applyCompoundGate(out: Finding[], chart: JyotishaChart, h: number): Finding[] {
   const house = chart.bhavas[h - 1];
