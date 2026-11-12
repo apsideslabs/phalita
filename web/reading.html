@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="phalita-build" content="v15" />
+<meta name="phalita-build" content="v16" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Read your chart — Phalita</title>
 <meta name="description" content="A reading of your birth chart, chapter by chapter, from Phaladīpikā." />
-<link rel="stylesheet" href="./css/style.css?v=15" />
-<link rel="stylesheet" href="./css/reading.css?v=15" />
-<link rel="stylesheet" href="./css/verify.css?v=15" />
+<link rel="stylesheet" href="./css/style.css?v=16" />
+<link rel="stylesheet" href="./css/reading.css?v=16" />
+<link rel="stylesheet" href="./css/verify.css?v=16" />
 <style>
 .adv { margin-top: 0.35rem; }
 .adv summary {
@@ -48,7 +48,6 @@
 .vf-btns button.yes { border-color: #bcd9c6; color: #2f6b4f; }
 .vf-btns button.no  { border-color: #efc9c0; color: #9a3b2c; }
 
-/* The reading is withheld until the check is finished. */
 #out.gated { display: none; }
 </style>
 </head>
@@ -124,17 +123,16 @@
   </div>
 </footer>
 
-<script src="./js/place.js?v=15"></script>
-<script src="./js/engine.js?v=15"></script>
-<script src="./js/verify.js?v=15"></script>
-<script src="./js/app.js?v=15"></script>
+<script src="./js/place.js?v=16"></script>
+<script src="./js/engine.js?v=16"></script>
+<script src="./js/verify.js?v=16"></script>
+<script src="./js/app.js?v=16"></script>
 <script>
 (function () {
   var form = document.getElementById('birth');
   var out = document.getElementById('out');
   if (!form || !out) return;
 
-  // Fold the form and go to the check after submit.
   form.addEventListener('submit', function () {
     setTimeout(function () {
       form.classList.add('collapsed');
@@ -143,7 +141,6 @@
     }, 900);
   });
 
-  // Re-open the form if the folded bar is tapped.
   form.addEventListener('click', function (e) {
     if (form.classList.contains('collapsed') && e.target.tagName === 'BUTTON') {
       form.classList.remove('collapsed');
@@ -151,21 +148,20 @@
   });
 
   // Hold the reading back until all five checks are answered.
-  var mo = new MutationObserver(function () {
+  // A MutationObserver over an 8,000px document hung the page, so this polls
+  // once every 250 ms and stops the moment the verdict lands.
+  var poll = setInterval(function () {
     var panel = document.getElementById('verify-panel');
-    if (panel && !out.classList.contains('gated') && !out.dataset.revealed) {
-      out.classList.add('gated');
-    }
+    var outEl = document.getElementById('out');
+    if (!panel || !outEl) return;
+    if (!outEl.dataset.revealed) outEl.classList.add('gated');
     var v = document.getElementById('vf-verdict');
     if (v && (v.classList.contains('pass') || v.classList.contains('fail'))) {
-      out.dataset.revealed = '1';
-      out.classList.remove('gated');
+      outEl.dataset.revealed = '1';
+      outEl.classList.remove('gated');
+      clearInterval(poll);
     }
-  });
-  mo.observe(document.body, {
-    childList: true, subtree: true,
-    attributes: true, attributeFilter: ['class']
-  });
+  }, 250);
 })();
 </script>
 </body>
