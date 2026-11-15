@@ -204,8 +204,31 @@
     };
 
     var fromHome = prefill(form);
-    form.addEventListener('submit', function (ev) { ev.preventDefault(); run(); });
-    run();
+
+    /* A chart may only be cast from a COMPLETE birth record. Previously this page
+       called run() on load, so opening it with an empty form cast a chart from
+       NaN and rendered a reading nobody had asked for. */
+    var complete = function () {
+      return FIELDS.every(function (n) {
+        var el = form.elements.namedItem(n);
+        return el && String(el.value).trim() !== '';
+      });
+    };
+
+    var askForBirth = function () {
+      out.innerHTML = '<div class="narrow"><p class="quiet">' +
+        'Enter your own date, time and place of birth above. No chart is cast, ' +
+        'and nothing is read, until every field is filled — a default would be ' +
+        'somebody else\'s chart.</p></div>';
+    };
+
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      if (!complete()) { askForBirth(); return; }
+      run();
+    });
+
+    if (fromHome && complete()) { run(); } else { askForBirth(); }
 
     if (fromHome) {
       var target = out.getBoundingClientRect().top + window.scrollY - 20;

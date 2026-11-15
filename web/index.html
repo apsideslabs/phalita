@@ -61,23 +61,24 @@
     <form class="vform" id="quick" action="./reading.html" method="get">
       <div class="frow">
         <label class="wide"><span>Place of birth</span>
-          <input type="text" id="place" name="place" list="placelist" placeholder="Start typing a city…" autocomplete="off" value="Guwahati, Assam" />
+          <input type="text" id="place" name="place" list="placelist" placeholder="Start typing a city…" autocomplete="off" />
           <datalist id="placelist"></datalist>
         </label>
       </div>
       <div class="frow two">
-        <label><span>Date of birth</span><input type="date" name="date" value="1990-08-15" required /></label>
-        <label><span>Time of birth</span><input type="time" name="time" value="06:45" required /></label>
+        <label><span>Date of birth</span><input type="date" name="date" required /></label>
+        <label><span>Time of birth</span><input type="time" name="time" required /></label>
       </div>
       <details class="adv">
         <summary>Coordinates, if the place is not listed</summary>
         <div class="frow three">
-          <label><span>Latitude</span><input type="number" name="lat" step="0.0001" value="26.1445" required /></label>
-          <label><span>Longitude</span><input type="number" name="lon" step="0.0001" value="91.7362" required /></label>
-          <label><span>UTC offset</span><input type="number" name="tz" step="0.25" value="5.5" required /></label>
+          <label><span>Latitude</span><input type="number" name="lat" step="0.0001" placeholder="filled from the place" /></label>
+          <label><span>Longitude</span><input type="number" name="lon" step="0.0001" placeholder="filled from the place" /></label>
+          <label><span>UTC offset</span><input type="number" name="tz" step="0.25" placeholder="e.g. 5.5" /></label>
         </div>
         <p class="advnote">Offsets are standard time. India has no daylight saving; some countries do.</p>
       </details>
+      <p id="quick-note" class="advnote" hidden></p>
       <button type="submit">Read My Kundli</button>
     </form>
 
@@ -273,5 +274,32 @@
 </footer>
 
 <script src="./js/place.js?v=6"></script>
+
+<script>
+/* No chart is cast from a blank or half-filled form. Every field here starts
+   empty on purpose: a pre-filled birth date silently reads somebody else's chart. */
+(function () {
+  var form = document.getElementById('quick');
+  if (!form) return;
+  var need = ['place', 'date', 'time', 'lat', 'lon', 'tz'];
+  form.addEventListener('submit', function (ev) {
+    var missing = need.filter(function (n) {
+      var el = form.elements.namedItem(n);
+      return !el || String(el.value).trim() === '';
+    });
+    if (!missing.length) return;
+    ev.preventDefault();
+    var note = document.getElementById('quick-note');
+    if (note) {
+      note.textContent = missing.indexOf('lat') >= 0 || missing.indexOf('lon') >= 0
+        ? 'Pick your birth place from the list, or open “Coordinates” and enter them — a chart cannot be cast without them.'
+        : 'Enter your own date and time of birth.';
+      note.hidden = false;
+    }
+    var place = form.elements.namedItem('place');
+    if (place && missing.indexOf('place') >= 0) place.focus();
+  });
+})();
+</script>
 </body>
 </html>
