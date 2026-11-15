@@ -16,24 +16,41 @@
   var chart = null;
   var cache = {};
 
+  /* The birth record must come from the URL. It used to fall back to a hard-coded
+     Guwahati / 15-08-1990 / 06:45 record, which meant every visitor who reached
+     this page without parameters was read as that one person. Now a missing
+     record is a missing record: no chart, and the page says so. */
   function readQuery() {
     var q = new URLSearchParams(window.location.search);
-    var d = String(q.get('date') || '1990-08-15').split('-').map(Number);
-    var t = String(q.get('time') || '06:45').split(':').map(Number);
+    var date = q.get('date'), time = q.get('time');
+    var lat = q.get('lat'), lon = q.get('lon'), tz = q.get('tz');
+    if (!date || !time || !lat || !lon || !tz) return null;
+    var d = String(date).split('-').map(Number);
+    var t = String(time).split(':').map(Number);
+    if (d.length !== 3 || t.length !== 2 || d.some(isNaN) || t.some(isNaN)) return null;
+    if (isNaN(Number(lat)) || isNaN(Number(lon)) || isNaN(Number(tz))) return null;
     return {
       year: d[0], month: d[1], day: d[2],
       hour: t[0], minute: t[1], second: 0,
-      latitude: Number(q.get('lat') || 26.1445),
-      longitude: Number(q.get('lon') || 91.7362),
-      timezoneOffsetHours: Number(q.get('tz') || 5.5),
-      locationName: 'Guwahati',
+      latitude: Number(lat),
+      longitude: Number(lon),
+      timezoneOffsetHours: Number(tz),
+      locationName: q.get('place') || '—',
       jaiminiScheme: '8_karaka'
     };
   }
 
   function ensureChart() {
-    if (!chart && window.Phalita) chart = window.Phalita.calculateFullJyotishaChart(readQuery());
+    var birth = readQuery();
+    if (!birth) return null;
+    if (!chart && window.Phalita) chart = window.Phalita.calculateFullJyotishaChart(birth);
     return chart;
+  }
+
+  function needBirth(out) {
+    out.innerHTML = '<p class="hintline">No birth record was given, so there is no ' +
+      'chart to ask. <a href="./index.html">Enter your date, time and place of ' +
+      'birth</a> — nothing is read until you do.</p>';
   }
 
   function domains(out) {
@@ -68,6 +85,8 @@
       out.innerHTML = '<p class="hintline">The engine has not loaded.</p>';
       return;
     }
+
+    if (!ensureChart()) { needBirth(out); return; }
 
     if (!cache[name]) {
       out.innerHTML = '<p class="hintline">Reading ' + esc(name) + '…</p>';
